@@ -91,7 +91,7 @@ namespace TalkBox
                         backSlashes++;
                     }
 
-                    // If it's even then it doesn't naturalise the '#'
+                    // If it's even then it doesn't naturalize the '#'
                     if (backSlashes % 2 == 0)
                     {
                         string tags = text.Substring(i + 1);
@@ -116,7 +116,7 @@ namespace TalkBox
                         backSlashes++;
                     }
 
-                    // If it's even then it doesn't naturalise the ':'
+                    // If it's even then it doesn't naturalize the ':'
                     if (backSlashes % 2 == 0)
                     {
                         string speaker = text.Substring(0, i).Trim();
@@ -139,13 +139,13 @@ namespace TalkBox
                 try { next = text[i + 1]; }
                 catch (IndexOutOfRangeException e)
                 {
-                    Console.WriteLine(@"You can't use a '\' to neutralise nothing");
+                    Console.WriteLine(@"You can't use a '\' to neutralize nothing");
                     throw e;
                 }
 
                 // It's actually a line break.
                 if (next == 'n') text = text.Substring(0, i) + '\n' + text.Substring(i + 2);
-                // It's a neutralised '\'.
+                // It's a neutralized '\'.
                 else if (next == '\\') text = text.Substring(0, i) + text.Substring(i + 1);
                 // It's invalid.
                 else throw new InvalidOperationException(@$"'\{text[i + 1]}' is not valid");
@@ -206,16 +206,16 @@ namespace TalkBox
                     try { next = text[i + 1]; }
                     catch (IndexOutOfRangeException e)
                     {
-                        Console.WriteLine(@"You can't use a '\' to neutralise nothing");
+                        Console.WriteLine(@"You can't use a '\' to neutralize nothing");
                         throw e;
                     }
 
-                    string neutralise = @"[]{}\";
+                    string neutralize = @"[]{}\:";
 
                     // It's actually a line break.
                     if (next == 'n') text = text.Substring(0, i) + '\n' + text.Substring(i + 2);
-                    // It's a neutralised symbol.
-                    else if (neutralise.Contains(next)) text = text.Substring(0, i) + text.Substring(i + 1);
+                    // It's a neutralized symbol.
+                    else if (neutralize.Contains(next)) text = text.Substring(0, i) + text.Substring(i + 1);
                     // It's invalid.
                     else throw new InvalidOperationException(@$"'\{text[i + 1]}' is not valid");
                 }
@@ -245,7 +245,7 @@ namespace TalkBox
         }
     }
 
-    // A iterable collection of text lines for the dialogue displayer to display
+    // A iterable collection of text lines for the whatever displays the dialogue to display
     class TLineCollection : IEnumerable
     {
         public TLine[] lines { get; private set; }
