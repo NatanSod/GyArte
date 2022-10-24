@@ -47,6 +47,15 @@ namespace TalkBox
 
     class CommandManager
     {
+        public enum Mode 
+        {
+            None, 
+            Skip,
+            End,
+        }
+
+        public Mode currentMode { get; private set; } = Mode.None;
+
         private List<Command> commands = new List<Command>();
 
         public CommandManager ()
@@ -74,8 +83,9 @@ namespace TalkBox
             }
         }
 
-        public bool ExecuteAll()
+        public bool ExecuteAll(Mode mode = Mode.None)
         {
+            currentMode = mode;
             bool wait = false;
             for (int i = 0; i < commands.Count; i++)
             {

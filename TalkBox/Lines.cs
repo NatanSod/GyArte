@@ -354,8 +354,10 @@ namespace TalkBox
             a = Regex.Split(arguments, @"\s+");
         }
 
-        public void Execute()
+        public bool Execute(CommandManager commandManager)
         {
+            // The async commands need to check the mode of commandManager in case it's skipping or similar.
+
             // The 'jump' command is not here because Dialogue Runner handles that
             if (c == "declare")
             {
@@ -431,6 +433,7 @@ namespace TalkBox
             {
                 throw new ArgumentException($"{c} is not a command");
             }
+            return false;
         }
     }
 }

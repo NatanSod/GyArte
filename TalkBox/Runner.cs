@@ -14,6 +14,7 @@ namespace TalkBox
         string nodeName;
         Node currentNode;
         Dictionary<string, Node> nodes;
+        CommandManager cm;
 
         List<TLine> options = new List<TLine>();
 
@@ -27,8 +28,9 @@ namespace TalkBox
 
         private List<Mode> hierarchy = new List<Mode>();
 
-        public DialogueRunner(string dialogueName, string node = "Start")
+        public DialogueRunner(CommandManager commandManager, string dialogueName, string node = "Start")
         {
+            cm = commandManager;
             nodes = Parser.Make(dialogueName);
             nodeName = node;
             currentNode = nodes[nodeName];
@@ -230,8 +232,6 @@ namespace TalkBox
 
                     case Line.LineType.Command:
                         CLine cLine = currentLine as CLine ?? throw new Exception();
-                        // TODO: If I want async commands then, I need to make this check the return value so that it can handle it properly.
-                        while (awaiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
                         if (cLine.c == "jump")
                         {
                             // I feel it's safer if jump is handled from in here.
@@ -240,7 +240,11 @@ namespace TalkBox
                         }
                         else
                         {
-                            cLine.Execute();
+                            if (cLine.Execute(cm) == true)
+                            {
+                                awaiting = true;
+                                while (awaiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
+                            }
                             break;
                         }
                 }

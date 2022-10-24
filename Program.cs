@@ -33,8 +33,8 @@ namespace GyArte
 
             // bool aa = true;
             // if (aa) return;
-
-            DialogueRunner dr = new DialogueRunner("testDi");
+            CommandManager cm = new CommandManager();
+            DialogueRunner dr = new DialogueRunner(cm, "testDi");
             IEnumerator<TLineCollection?> LineGetter = dr.GetLineE();
 
             while (LineGetter.MoveNext())
