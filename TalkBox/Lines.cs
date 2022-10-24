@@ -8,13 +8,12 @@ namespace TalkBox
     // Options work in simple contexts.
     // if, ifelse, else, and endif work in simple contexts.
     // Everything directly related to variables probably works.
-    // Commands that have been added work. (Including jump.)
+    // Commands that have been added and work. (Including jump.)
 
     // Some more thorough testing of flow control might be good.
 
     // TODO: Add the async commands
 
-    #region The Line class and everything that is derived from or directly uses it
     abstract class Line
     {
         public enum LineType
@@ -434,5 +433,4 @@ namespace TalkBox
             }
         }
     }
-    #endregion
 }
