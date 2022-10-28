@@ -127,29 +127,6 @@ namespace TalkBox
 
             return null;
         }
-
-        // I think this is bad
-        static private void UnSlash(ref string text)
-        {
-            for (int i = 0; i < text.Length; i++)
-            {
-                // This "solution" is stupid but I like it.
-                char next = ' ';
-                try { next = text[i + 1]; }
-                catch (IndexOutOfRangeException e)
-                {
-                    Console.WriteLine(@"You can't use a '\' to neutralize nothing");
-                    throw e;
-                }
-
-                // It's actually a line break.
-                if (next == 'n') text = text.Substring(0, i) + '\n' + text.Substring(i + 2);
-                // It's a neutralized '\'.
-                else if (next == '\\') text = text.Substring(0, i) + text.Substring(i + 1);
-                // It's invalid.
-                else throw new InvalidOperationException(@$"'\{text[i + 1]}' is not valid");
-            }
-        }
     }
 
     // A line that contains text in the form of dialogue or an option to be displayed
@@ -164,8 +141,10 @@ namespace TalkBox
         /// </summary>
         public string? s { get; private set; }
         public string statement { get; private set; } = String.Empty;
-            
+
         public Tag lineTags { get; private set; }
+
+        private SpanCollection markups = new SpanCollection();
 
         public TLine(string text, string? speaker, bool isOption, int indent, int nr, string[]? tags)
         {
@@ -174,9 +153,9 @@ namespace TalkBox
             line = nr;
             t = text;
             s = speaker;
-            
+
             string state;
-            lineTags = new Tag (tags, out state);
+            lineTags = new Tag(tags, out state);
             statement = state;
         }
 
@@ -191,7 +170,7 @@ namespace TalkBox
             statement = tLine.statement;
         }
 
-        public string GetLine()
+        public SpanCollection GetLine()
         {
             string text = t;
 
@@ -216,31 +195,55 @@ namespace TalkBox
                     // It's a neutralized symbol.
                     else if (neutralize.Contains(next)) text = text.Substring(0, i) + text.Substring(i + 1);
                     // It's invalid.
-                    else throw new InvalidOperationException(@$"'\{text[i + 1]}' is not valid");
+                    else throw new InvalidOperationException(@$"'\{next}' is not valid");
                 }
                 else if (current == '{')
                 {
-                    string futureText = text.Substring(i);
-                    string pattern = @"(?<=[^\\])\{(.*?[^\\])\}";
+                    string pattern = @"^(.{" + i + @"})\{([^\}]+)\}(.*)$";
 
-                    Match m = Regex.Match(futureText, pattern);
+                    Match m = Regex.Match(text, pattern);
                     if (m.Success)
                     {
-                        string replacement = Variables.Calculate(m.Groups[1].Value).GetValue<string>();
-                        text = text.Substring(i) + replacement;
+                        string replacement = Variables.Calculate(m.Groups[2].Value).GetValue<string>();
+                        text = m.Groups[1].Value + replacement + m.Groups[3].Value;
                     }
                     else
                     {
-                        throw new InvalidOperationException("For each '{' there needs to be a closing '}' as well.");
+                        throw new InvalidOperationException("Format your mid-line math properly");
                     }
                 }
-                // TODO: Add markup support
                 else if (current == '[')
                 {
-                    throw new Exception("Markup support is currently unavailable");
+                    string pattern = @"^(.{" + i + @"})\[([^\]]+)\](.*)$";
+                    Match m = Regex.Match(text, pattern);
+                    if (m.Success)
+                    {
+                        string markup = m.Groups[2].Value;
+                        if (markup[0] == '/')
+                        {
+                            if (markup.Length == 1)
+                            {
+                                markups.Close(i);
+                            }
+                            else
+                            {
+                                markups.Close(markup, i);
+                            }
+                        }
+                        else
+                        {
+                            markups.Open(markup, i);
+                        }
+                        text = m.Result("$1$3");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Format your markup properly");
+                    }
                 }
             }
-            return text;
+            markups.SetString(text);
+            return markups;
         }
     }
 
