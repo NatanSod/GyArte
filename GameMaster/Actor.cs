@@ -7,15 +7,15 @@ namespace GameMaster
 {
     abstract class Actor
     {
-        public enum Activity 
+        public enum Activity
         {
             Starting,
             Active,
             Destroyed,
         }
 
-        public Vector3 Position;
-        public Vector3 Velocity;
+        public Vector3 position;
+        public Vector3 velocity;
         public Activity activity { get; private set; } = Activity.Starting;
 
         public void Initialize()
@@ -28,12 +28,13 @@ namespace GameMaster
 
         public void Continue()
         {
-            if (activity != Activity.Active ) return;
+            if (activity != Activity.Active) return;
             Update();
         }
 
         protected virtual void Start() { }
         protected virtual void Update() { }
+        public virtual void Draw() { }
 
         /// <summary>
         /// Add a function to be called when this object is removed from the game logic.

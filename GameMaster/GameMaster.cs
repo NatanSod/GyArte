@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace GameMaster
 {
-    class GameMaster
+    class Master
     {
         public enum Step
         {
@@ -13,8 +13,15 @@ namespace GameMaster
             Update,
             Start,
             Destroy,
+            Draw,
         }
         public Step currentStep { get; private set; } = Step.Initialize;
+
+        /// <summary>
+        /// The amount of updates that have happened since the game started.
+        /// </summary>
+        /// <value></value>
+        public static uint updates { get; private set; } = 0;
 
         protected Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
         protected List<Actor> StartWhenDone = new List<Actor>();
@@ -44,12 +51,12 @@ namespace GameMaster
         /// <param name="name">The name to give the object. Note that the name may change.</param>
         /// <typeparam name="ActorType">The type of actor to create.</typeparam>
         /// <returns>A delegate that returns the created actor</returns>
-        public GameObject<ActorType> Create<ActorType>(ref string name) where ActorType : Actor, new()
+        public GameObject<ActorType> Create<ActorType>(string name) where ActorType : Actor, new()
         {
             ActorType? actor = new ActorType();
 
             // If the name given includes (n), remove it.
-            Match m = Regex.Match(name.Trim(), @"^(.*?)(\d+\)$");
+            Match m = Regex.Match(name.Trim(), @"^(.*?)\(\d+\)$");
             if (m.Success) name = m.Groups[1].Value;
 
             int i = 0;
@@ -71,7 +78,6 @@ namespace GameMaster
         public void Destroy(string name)
         {
             toDestroy.Add(name);
-
         }
 
         /// <summary>
@@ -91,14 +97,16 @@ namespace GameMaster
 
         public void Update()
         {
+            // Update logic.
             currentStep = Step.Update;
-            for (int i = 0; i < actors.Count; i ++)
+            for (int i = 0; i < actors.Count; i++)
             {
                 Actor actor = actors.ElementAt(i).Value;
                 actor.Continue();
                 WhenDone();
             }
 
+            // Destroy any objects that should be destroyed.
             currentStep = Step.Destroy;
             while (toDestroy.Count != 0)
             {
@@ -115,6 +123,23 @@ namespace GameMaster
 
                 WhenDone();
             }
+
+            // I want them to move after they all decide to move so that the order in which they are updated won't effect their movement.
+            for (int i = 0; i < actors.Count; i++)
+            {
+                Actor actor = actors.ElementAt(i).Value;
+                actor.position += actor.velocity;
+            }
+
+            // Draw those who remain.
+            currentStep = Step.Draw;
+            for (int i = 0; i < actors.Count; i++)
+            {
+                Actor actor = actors.ElementAt(i).Value;
+                actor.Draw();
+                WhenDone();
+            }
+            updates++;
         }
 
         private void WhenDone()
