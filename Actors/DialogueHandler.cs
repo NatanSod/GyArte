@@ -154,7 +154,7 @@ namespace GyArte
                     // Until then, if this happens, no action should be taken.
                 }
             }
-            else 
+            else
             {
                 // The dialogue has ended (It might also not exist, but that should never happen).
                 LineGetter = null;
@@ -165,17 +165,54 @@ namespace GyArte
         class DialogueDisplay
         {
             TLine? currentLine;
-            TextBox text = new TextBox(); 
+            SpanCollection? currentSpans;
+            TextLayout layout = new TextLayout(20);
+            int progress = 0;
+            int maxLength = 0;
+            TextBox text = new TextBox();
             TextBox name = new TextBox();
             List<(TextBox, bool)> options = new List<(TextBox, bool)>();
-            
+
             public bool done { get; private set; } = false;
 
             public void SetLine(TLine line)
             {
                 currentLine = line;
+                currentSpans = currentLine.GetLine();
+                progress = 0;
+
+                layout.Clear();
+                foreach (Span span in currentSpans)
+                {
+                    float size = 1;
+                    Span.MarkValue mSize = span.GetValue(Span.Markup.Size);
+                    if (mSize == Span.MarkValue.Big)
+                    {
+                        size = 1.5f;
+                    }
+                    else if (mSize == Span.MarkValue.Small)
+                    {
+                        size = 0.5f;
+                    }
+
+                    foreach (char symbol in span.contents)
+                    {
+                        if (symbol == ' ')
+                        {
+                            layout.Add(null);
+                        }
+                        else if (symbol == '\n')
+                        {
+                            layout.Add(-1);
+                        }
+                        else
+                        {
+                            layout.Add(size);
+                        }
+                    }
+                }
             }
-            
+
             public void EndOptions()
             {
                 options.Clear();
@@ -188,7 +225,33 @@ namespace GyArte
 
             public void Display()
             {
+                if (currentLine == null) return;
 
+                if (!done)
+                {
+                    if (progress < currentLine.t.Length)
+                    {
+                        progress++;
+                    }
+                    else
+                    {
+                        done = true;
+                    }
+                }
+
+                int i = 0;
+
+                SpanCollection spans = currentLine.GetLine();
+                foreach (Span span in spans)
+                {
+                    foreach (char symbol in span.contents)
+                    {
+                        if (i < progress) break;
+
+                        // Vector2 position = layout[i] * new Vector2(characterWidth, lineHeight) + textBoxPosition.
+                        i++;
+                    }
+                }
             }
 
             public void Display(int option)
@@ -204,7 +267,7 @@ namespace GyArte
                 // Unfinished.
             }
 
-            public TextBox (TLine text)
+            public TextBox(TLine text)
             {
                 // Unfinished.
             }
