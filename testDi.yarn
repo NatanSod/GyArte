@@ -2,8 +2,8 @@ title: Start
 position: 57,-145
 ---
 Natan: Time for some wacky testing!
-Natan: In this line, only [color=red]this[/color] should be red.
-Natan: In this line, everything past [color=red]this should be red.[/]
-Natan: [color=red]You get the drill, everything.[/color]
-Natan: In this line, \[color=red\]nothing\[/color\] should be red.
+Natan: This is a really long line so it should try to wrap it back around at some point.
+Natnn: This time howerver, itisgoingtobeaverylongwordbuthopefullyitwillstillwriteitasgoodaspossible.
+Natan: Let's try some line breaks. \n                     There are loads of space here.
+Natan: Now, time to try the size markup, both [size=big]big[/size] and [size=small]small[/size].
 ===

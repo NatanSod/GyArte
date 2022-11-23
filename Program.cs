@@ -12,9 +12,12 @@ namespace GyArte
     {
         static void Main(string[] args)
         {
-            Raylib.InitWindow(800, 600, "The title of my window");
+            Raylib.SetTraceLogLevel(TraceLogLevel.LOG_NONE);
+            Raylib.InitWindow(800, 600, "Game");
             Master gm = new Master();
-            gm.Create<Player>("Player");
+            // gm.Create<Player>("Player");
+            gm.Create<DialogueHandler>("DialogueHandler")()?.BeginDialogue("testDi");
+
             Raylib.SetTargetFPS(60);
 
             while (!Raylib.WindowShouldClose())
@@ -24,6 +27,11 @@ namespace GyArte
                 Raylib.ClearBackground(Color.WHITE);
 
                 gm.Update();
+
+                Raylib.DrawRectangle(-25, -25, 50, 50, Color.RED);
+                Raylib.DrawRectangle(800 -25, -25, 50, 50, Color.RED);
+                Raylib.DrawRectangle(-25, 600 -25, 50, 50, Color.RED);
+                Raylib.DrawRectangle(800 -25, 600 -25, 50, 50, Color.BLUE);
 
                 Raylib.EndDrawing();
             }
