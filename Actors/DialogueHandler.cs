@@ -10,11 +10,13 @@ namespace GyArte
 {
     class DialogueHandler : Actor
     {
+        // TODO: Make a function that ends dialogue in a more elegant and official fashion.
+
         CommandManager cm = new CommandManager();
         public string dialogue = String.Empty;
         DialogueRunner? dr;
         IEnumerator<TLineCollection?>? LineGetter;
-        DialogueDisplay dd = new DialogueDisplay(new Vector2(50, 400), new Vector2(700, 90), 10, 5, new FontSize(30, 20, 10), 30);
+        DialogueDisplay dd = new DialogueDisplay(new Vector2(50, 400), new Vector2(700, 90), 10, 5, new Scales(30, 20, 10), 30, new Scales(80, 30, 10));
         bool waiting = false;
         bool auto = false;
         List<int> choices = new List<int>();
@@ -83,6 +85,10 @@ namespace GyArte
             {
                 // The line is being written to the screen and it isn't waiting for an async command.
                 // If next line input was given, then tell the displayer to finnish.
+                if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                {
+                    dd.SkipLine();
+                }
             }
 
             // Display the dialogue.
@@ -127,7 +133,7 @@ namespace GyArte
                     {
                         // Option line.
                         int i = 0;
-                        foreach (TLine line in (currentLine.lines ?? throw new Exception("This should never happen, but it makes the IDE happy.")))
+                        foreach (TLine line in ((TLine[])currentLine.lines))
                         {
                             if (line.statement == String.Empty || Variables.Evaluate(line.statement))
                             {
@@ -142,6 +148,14 @@ namespace GyArte
                             }
                             // Else, this line is not to be displayed.
                             i++;
+                        }
+
+                        if (choices.Count == 0)
+                        {
+                            // There is no option that can be selected, end the dialogue.
+                            LineGetter = null;
+                            dr = null;
+                            return;
                         }
 
                         auto = false;
@@ -162,19 +176,24 @@ namespace GyArte
             }
         }
 
-        struct FontSize
+        struct Scales
         {
             public int big { get; private set; }
             public int medium { get; private set; }
             public int small { get; private set; }
 
-            public FontSize(int big, int medium, int small)
+            public Scales(int big, int medium, int small)
             {
                 this.big = big;
                 this.medium = medium;
                 this.small = small;
             }
 
+            /// <summary>
+            /// Get text size
+            /// </summary>
+            /// <param name="size"></param>
+            /// <returns></returns>
             public int Get(Span.MarkValue size)
             {
                 if (size == Span.MarkValue.BIG)
@@ -183,6 +202,25 @@ namespace GyArte
                     return small;
                 else
                     return medium;
+            }
+
+            /// <summary>
+            /// Get how many symbols will be displayed in 60 frames.
+            /// </summary>
+            /// <param name="tag"></param>
+            /// <returns></returns>
+            public float Get(Tag tag)
+            {
+                switch ((tag & Tag.Tags.SPEED | Tag.Tags.METAMASK) ^ Tag.Tags.METAMASK)
+                {
+                    case Tag.Tags.FAST:
+                        return big / 60f;
+                    default:
+                    case Tag.Tags.NORM:
+                        return medium / 60f;
+                    case Tag.Tags.SLOW:
+                        return small / 60f;
+                }
             }
         }
 
@@ -193,11 +231,12 @@ namespace GyArte
             TextLayout layout = new TextLayout(20);
             Vector2 textOrigin;
             Vector2 textArea;
-            FontSize fontSize;
+            Scales fontSize;
             int lineHeight;
             int margin;
             int border;
-            FontSize symbolBase;
+            Scales symbolBase;
+            Scales textSpeed;
             float progress = 0;
             TextBox text = new TextBox();
             TextBox name = new TextBox();
@@ -214,9 +253,10 @@ namespace GyArte
             /// <param name="lineHeight">Self explanatory.</param>
             /// <param name="monospace">Should the font be displayed as if monospaced?</param>
             /// <param name="symbolMargin">The amount of additional pixels between each symbol</param>
-            public DialogueDisplay(Vector2 textOrigin, Vector2 textArea, int margin, int border, FontSize fontSize, int lineHeight)
+            public DialogueDisplay(Vector2 textOrigin, Vector2 textArea, int margin, int border, Scales fontSize, int lineHeight, Scales textSpeed)
             {
                 this.fontSize = fontSize;
+                this.textSpeed = textSpeed;
                 this.lineHeight = lineHeight;
                 this.textArea = textArea;
                 this.margin = margin;
@@ -247,7 +287,7 @@ namespace GyArte
                         }
                         return -1; // To make it apparent that things went wrong.
                     }
-                    symbolBase = new FontSize(GetBase(this.fontSize.big), GetBase(this.fontSize.medium), GetBase(this.fontSize.small));
+                    symbolBase = new Scales(GetBase(this.fontSize.big), GetBase(this.fontSize.medium), GetBase(this.fontSize.small));
                 }
             }
 
@@ -283,6 +323,15 @@ namespace GyArte
                 }
             }
 
+            public void SkipLine()
+            {
+                if (currentLine != null)
+                {
+                    progress = currentLine.t.Length;
+                    done = true;
+                }
+            }
+
             public void EndOptions()
             {
                 options.Clear();
@@ -301,7 +350,7 @@ namespace GyArte
                 {
                     if (progress < currentLine.t.Length)
                     {
-                        progress++;
+                        progress += textSpeed.Get(currentLine.lineTags);
                     }
                     else
                     {
