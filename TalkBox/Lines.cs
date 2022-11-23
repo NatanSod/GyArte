@@ -227,7 +227,7 @@ namespace TalkBox
                             }
                             else
                             {
-                                markups.Close(markup, i);
+                                markups.Close(markup.Substring(1), i);
                             }
                         }
                         else

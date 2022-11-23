@@ -2,8 +2,7 @@ title: Start
 position: 57,-145
 ---
 Natan: Time for some wacky testing!
-Natan: This is a really long line so it should try to wrap it back around at some point.
-Natnn: This time howerver, itisgoingtobeaverylongwordbuthopefullyitwillstillwriteitasgoodaspossible.
-Natan: Let's try some line breaks. \n                     There are loads of space here.
-Natan: Now, time to try the size markup, both [size=big]big[/size] and [size=small]small[/size].
+Natan: First, time to try the size markup, both [size=big]big[/size] and [size=small]small[/size].
+Natan: Next, We try the colors. We have [color=red]red[/], [color=green]green[/], and [blue=0000ff]blue[/].
+Natan: [color=aa]This[/], [color=aaff]this[/], [color=aaaaaa]this[/], and even [color=aaaaaaff]this[/], should all be the same shade of grey. But [color=aa00]this[/] should be invisible.
 ===

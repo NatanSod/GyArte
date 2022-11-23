@@ -35,35 +35,46 @@ namespace TalkBox
 
     class Span
     {
+        // The way this works is simpler and (in my opinion) cleaner than the Tag class.
+        // However, the Tag class is a lot safer* and everything about a tag, such as what kind of values it accepts, is defined by the tag itself.
+        // This class, on the other hand, will let you set the color to big, and color accepting hexadecimal values is hard coded.
+        // However, making this brought me way less pain than making the Tag class.
+
+        // *If we ignore the fact that not even I, the person who made it, fully understands how it works.
         [System.Flags]
-        public enum Markup : uint
+        public enum Markup : UInt64
         {
-            None = 0,
+            NONE = 0,
 
-            // Non moving ones -----------
-            Bold = 0b_0000_0001,
-            Italic = 0b_0000_0010,
+            // Non moving ones --------------
+            BOLD = 0b_0000_0001,
+            ITALIC = 0b_0000_0010,
 
-            Size = 0b_0000_1100,
-
-            Color = 0b_1111_0000_0000,
+            SIZE = 0b_0000_1100,
 
             // Moving -----------------------
-            Shaking = 0b_0000_0001_0000_0000_0000_0000,
+            SHAKING = 0b_0000_0001_0000,
+
+            // Color ------------------------
+            //         RR GG BB AA
+            COLOR = 0x_ff_ff_ff_ff_00_00_00_00,
         }
 
         [System.Flags]
         public enum MarkValue : uint
         {
-            None = 0,
+            NONE = 0,
 
-            Big = 1,
-            Small = 2,
+            BIG = 1,
+            SMALL = 2,
 
-            Red = 1,
-            Green = 2,
-            Blue = 3,
-            Rainbow = 15,
+            // Color ------------------------
+            // RGBA        RR GG BB AA
+            BLACK /**/ = 0x00_00_00_ff,
+            RED /*  */ = 0xff_00_00_ff,
+            GREEN /**/ = 0x00_ff_00_ff,
+            BLUE /* */ = 0x00_00_ff_ff,
+            WHITE /**/ = 0xff_ff_ff_ff,
         }
 
         public Markup markup { get; private set; }
@@ -80,16 +91,27 @@ namespace TalkBox
             return (mark & markup) != 0;
         }
 
+        /// <summary>
+        /// Get the normalised value of the data under <paramref name="mark"/>.
+        /// </summary>
+        /// <param name="mark">The area under which the value lies.</param>
+        /// <returns></returns>
         public MarkValue GetValue(Markup mark)
         {
-            uint area = (uint)mark;
-            uint value = (uint)markup & (uint)mark;
-            uint move = (area - 1) ^ (area | (area - 1)); // This only leaves the smallest 1 in the binary sequence of the area tag.
+            UInt64 area = (UInt64)mark;
+            UInt64 value = (UInt64)markup & (UInt64)mark;
+            UInt64 move = (area - 1) ^ (area | (area - 1)); // This only leaves the smallest 1 in the binary sequence of the area tag.
 
-            uint movedValue = value / move; // And this moves the value to the position of that last 1.
+            UInt64 movedValue = value / move; // And this moves the value to the position of that last 1.
 
-            return (MarkValue) movedValue;
+            return (MarkValue)movedValue;
         }
+
+        // The color values.
+        public int red /*  */ { get { return (int)GetValue((Markup)0xff_00_00_00_00_00_00_00); } }
+        public int green /**/ { get { return (int)GetValue((Markup)0x00_ff_00_00_00_00_00_00); } }
+        public int blue /* */ { get { return (int)GetValue((Markup)0x00_00_ff_00_00_00_00_00); } }
+        public int alpha /**/ { get { return (int)GetValue((Markup)0x00_00_00_ff_00_00_00_00); } }
     }
 
     class SpanCollection : IEnumerable
@@ -102,30 +124,55 @@ namespace TalkBox
             string markName = input.ToUpper();
 
             Span.Markup markup;
-            Span.MarkValue markValue = Span.MarkValue.None;
+            Span.MarkValue markValue = Span.MarkValue.NONE;
 
             int split = input.IndexOf('=');
             if (split != -1)
             {
-                string extra = markName[split + 1] + markName.Substring(split + 2).ToLower();
-                markName = markName[0] + markName.Substring(1, split - 1).ToLower();
+                string extra = markName.Substring(split + 1);
+                markName = markName.Substring(0, split);
 
-                if (!Enum.TryParse<Span.Markup>(markName, out markup) || ((uint)markup & ((uint)markup - 1)) == 0)
+                if (!Enum.TryParse<Span.Markup>(markName, out markup) || ((UInt64)markup & ((UInt64)markup - 1)) == 0)
                     throw new ArgumentException($"{markName} is not the name of a markup that needs a value");
 
+
                 if (!Enum.TryParse<Span.MarkValue>(extra, out markValue))
-                    throw new ArgumentException($"{extra} is not a markup value");
+                {
+                    // Hard coded way of giving it a color value in hexadecimal.
+                    if (markup == Span.Markup.COLOR)
+                    {
+                        uint color = 0;
+                        try { color = Convert.ToUInt32("0x" + extra.ToLower(), 16); }
+                        catch { throw new ArgumentException($"{extra} is neither a markup value or a hexadecimal value"); }
+
+                        switch (extra.Length)
+                        {
+                            case 2: // Grayscale with max alpha.
+                                markValue = (Span.MarkValue)(color * 0x01_01_01_00 + 0xff);
+                                break;
+                            case 4: // Grayscale with decided alpha.
+                                markValue = (Span.MarkValue)((color >> 8) * 0x01_01_01_00 + (color & 0x00_ff));
+                                break;
+                            case 6: // RGB with max alpha.
+                                markValue = (Span.MarkValue)(color * 0x00_00_01_00 + 0xff);
+                                break;
+                            case 8: // RGB with decided alpha.
+                                markValue = (Span.MarkValue)color;
+                                break;
+                            default:
+                                throw new ArgumentException($"{extra} is not a valid hexadecimal value");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"{extra} is not a markup value");
+                    }
+                }
             }
             else
             {
-                if (!Enum.TryParse<Span.Markup>(markName, out markup) || ((uint)markup & ((uint)markup - 1)) != 0)
+                if (!Enum.TryParse<Span.Markup>(markName, out markup) || ((UInt64)markup & ((UInt64)markup - 1)) != 0)
                     throw new ArgumentException($"{markName} is not the name of a markup that doesn't need a value");
-            }
-
-            Span.Markup type;
-            if (!Enum.TryParse<Span.Markup>(markName, out type))
-            {
-                throw new ArgumentException($"{markName} is not a markup that exists");
             }
 
             foreach (MetaSpan span in spans)
@@ -142,7 +189,7 @@ namespace TalkBox
 
         public void Close(string markup, int index)
         {
-            string markName = markup[1].ToString().ToUpper() + markup.Substring(2).ToLower();
+            string markName = markup.ToUpper();
             Span.Markup type;
             if (!Enum.TryParse<Span.Markup>(markName, out type))
             {
@@ -180,6 +227,16 @@ namespace TalkBox
             txt = text;
         }
 
+        Span.Markup MoveValue(Span.Markup markup, Span.MarkValue markValue)
+        {
+            UInt64 area = (UInt64)markup;
+            uint value = (uint)markValue;
+            UInt64 move = (area - 1) ^ (area | (area - 1)); // This only leaves the smallest 1 in the binary sequence of the area tag.
+
+            UInt64 movedValue = value * move; // And this moves the value to the position of that last 1.
+            return (Span.Markup)movedValue;
+        }
+
         public IEnumerator GetEnumerator()
         {
             foreach (MetaSpan span in spans)
@@ -190,19 +247,19 @@ namespace TalkBox
             while (index < txt.Length)
             {
                 int end = txt.Length;
-                Span.Markup type = Span.Markup.None;
+                Span.Markup type = Span.Markup.NONE;
 
+                bool colored = false;
                 foreach (MetaSpan s in spans)
                 {
                     if (index >= s.start && index < s.end)
                     {
-                        uint area = (uint)s.markup;
-                        uint value = (uint)s.value;
-                        uint move = (area - 1) ^ (area | (area - 1)); // This only leaves the smallest 1 in the binary sequence of the area tag.
+                        if (s.markup == Span.Markup.COLOR)
+                        {
+                            colored = true;
+                        }
 
-                        uint movedValue = value * move; // And this moves the value to the position of that last 1.
-
-                        type |= (Span.Markup)movedValue;
+                        type |= MoveValue(s.markup, s.value);
                         if (end > s.end)
                         {
                             end = s.end;
@@ -212,6 +269,12 @@ namespace TalkBox
                     {
                         end = s.start;
                     }
+                }
+                
+                // I would really want a better way of having a default colour, but I don't want to do more of this after the Tag class.
+                if (!colored)
+                {
+                    type |= type |= MoveValue(Span.Markup.COLOR, Span.MarkValue.BLACK);
                 }
                 Span span = new Span(type, txt.Substring(index, end - index));
                 yield return span;

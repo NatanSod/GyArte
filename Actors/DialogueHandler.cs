@@ -121,7 +121,7 @@ namespace GyArte
                     {
                         // Dialogue line.
                         dd.SetLine(currentLine.line ?? throw new Exception("This should never happen, but it makes the IDE happy."));
-                        auto = currentLine.line.lineTags.GetTag(Tag.Last);
+                        auto = currentLine.line.lineTags.GetTag(Tag.LAST);
                     }
                     else
                     {
@@ -135,7 +135,7 @@ namespace GyArte
                                 dd.AddOption(line, true);
                                 choices.Add(i);
                             }
-                            else if (line.lineTags.GetTag(Tag.Lock))
+                            else if (line.lineTags.GetTag(Tag.LOCK))
                             {
                                 // This line is to be displayed, but not selectable.
                                 dd.AddOption(line, false);
@@ -177,9 +177,9 @@ namespace GyArte
 
             public int Get(Span.MarkValue size)
             {
-                if (size == Span.MarkValue.Big)
+                if (size == Span.MarkValue.BIG)
                     return big;
-                else if (size == Span.MarkValue.Small)
+                else if (size == Span.MarkValue.SMALL)
                     return small;
                 else
                     return medium;
@@ -275,7 +275,7 @@ namespace GyArte
                         }
                         else
                         {
-                            int width = Raylib.ImageText(symbol.ToString(), fontSize.Get(span.GetValue(Span.Markup.Size)), Color.BLACK).width;
+                            int width = Raylib.ImageText(symbol.ToString(), fontSize.Get(span.GetValue(Span.Markup.SIZE)), Color.BLACK).width;
 
                             layout.Add(width);
                         }
@@ -326,16 +326,17 @@ namespace GyArte
                 SpanCollection spans = currentLine.GetLine();
                 foreach (Span span in spans)
                 {
-                    Span.MarkValue mSize = span.GetValue(Span.Markup.Size);
+                    Span.MarkValue mSize = span.GetValue(Span.Markup.SIZE);
+                    Color currentColor = new Color(span.red, span.green, span.blue, span.alpha);
 
                     int currentFontSize = fontSize.Get(mSize);
                     int currentBaseOffset = symbolBase.medium - symbolBase.Get(mSize);
 
-                    if (mSize == Span.MarkValue.Big)
+                    if (mSize == Span.MarkValue.BIG)
                     {
                         currentFontSize = fontSize.big;
                     }
-                    else if (mSize == Span.MarkValue.Small)
+                    else if (mSize == Span.MarkValue.SMALL)
                     {
                         currentFontSize = fontSize.small;
                     }
@@ -352,14 +353,15 @@ namespace GyArte
 
                         Vector2 position = layout[i] * (new Vector2(1, lineHeight)) + textOrigin;
 
-                        // This is to check that the symbols are spaced properly
-                        int width = Raylib.ImageText(symbol.ToString(), currentFontSize, Color.BLACK).width;
-                        Raylib.DrawRectangle((int)position.X, (int)position.Y + currentBaseOffset, width, currentFontSize, Color.RED);
-                        Raylib.DrawText(symbol.ToString(), 
-                                        (int)position.X, 
-                                        (int)position.Y + currentBaseOffset, 
-                                        currentFontSize, 
-                                        Color.BLACK);
+                        // This is to help check that the symbols are spaced properly.
+                        // int width = Raylib.ImageText(symbol.ToString(), currentFontSize, Color.BLACK).width;
+                        // Raylib.DrawRectangle((int)position.X, (int)position.Y + currentBaseOffset, width, currentFontSize, Color.RED);
+
+                        Raylib.DrawText(symbol.ToString(),
+                                        (int)position.X,
+                                        (int)position.Y + currentBaseOffset,
+                                        currentFontSize,
+                                        currentColor);
 
 
                         i++;

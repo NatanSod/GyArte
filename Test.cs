@@ -51,17 +51,17 @@ namespace GyArte
                     // Console.Clear();
                     TLine line = tlc.line ?? throw new Exception();
                     Tag tags = line.lineTags;
-                    int speed = (int)(80 - (tags.GetTagValue(Tag.Speed) - 1) * 30);
+                    int speed = (int)(80 - (tags.GetTagValue(Tag.SPEED) - 1) * 30);
 
                     if (line.s != null)
                     {
                         TypeWrite(line.s + ": ", speed);
                     }
-                    
+
                     SpanCollection sc = line.GetLine();
                     foreach (Span span in sc)
                     {
-                        if (span.GetValue(Span.Markup.Color) == Span.MarkValue.Red)
+                        if (span.GetValue(Span.Markup.COLOR) == Span.MarkValue.RED)
                         {
                             Console.BackgroundColor = ConsoleColor.Red;
                         }
@@ -70,7 +70,7 @@ namespace GyArte
                     }
                     Console.WriteLine();
 
-                    if (!tags.GetTag(Tag.Last))
+                    if (!tags.GetTag(Tag.LAST))
                     {
                         Console.ReadKey(true);
                     }
