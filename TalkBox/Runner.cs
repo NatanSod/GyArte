@@ -63,6 +63,7 @@ namespace TalkBox
                     case Mode.False:
                         throw new InvalidOperationException("Something went wacky with the hierarchy");
                 }
+                if (line >= currentNode.lines.Length) return;
             }
 
             if (hierarchy[level] != Mode.Text)
@@ -77,7 +78,7 @@ namespace TalkBox
             Line currentLine = currentNode.lines[line];
             while (true)
             {
-                // End if the current line's level is lower-
+                // End if the current line's level is lower.
                 if (currentLine.level < level)
                 {
                     break;
@@ -187,6 +188,7 @@ namespace TalkBox
                 if (currentLine.level < level)
                 {
                     GoDown();
+                    if (line >= currentNode.lines.Length) break;
                     currentLine = currentNode.lines[line];
                 }
 

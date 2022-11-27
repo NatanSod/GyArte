@@ -30,8 +30,8 @@ namespace TalkBox
 
             LAST /* */ = 0b_0000_0001, // This doesn't want a user input before continuing.
 
-            HIDE /* */ = 0b_0000_0010, // This option should only be displayed if the included statement evaluates true.
-            LOCK /* */ = 0b_0000_0100, //            -||-            selectable                -||-
+            HIDE /* */ = 0b_0000_0010 | STATEMENT, // This option should only be displayed if the included statement evaluates true.
+            LOCK /* */ = 0b_0000_0100 | STATEMENT, //            -||-            selectable                -||-
 
             SLOW /* */ = 0b_0000_1000, // Slow text speed. 
             NORM /* */ = 0b_0001_0000 | DEFAULT, // Normal text speed, the default.

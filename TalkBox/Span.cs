@@ -116,11 +116,15 @@ namespace TalkBox
 
     class SpanCollection : IEnumerable
     {
-        private List<MetaSpan> spans = new List<MetaSpan>();
-        private string txt = string.Empty;
+        private List<MetaSpan> metaSpans = new List<MetaSpan>();
+        private List<Span> spans = new List<Span>();
+        private bool compiled = true;
+        public string txt { get; private set; } = string.Empty;
 
+        #region Construction.
         public void Open(string input, int index)
         {
+            compiled = false;
             string markName = input.ToUpper();
 
             Span.Markup markup;
@@ -175,7 +179,7 @@ namespace TalkBox
                     throw new ArgumentException($"{markName} is not the name of a markup that doesn't need a value");
             }
 
-            foreach (MetaSpan span in spans)
+            foreach (MetaSpan span in metaSpans)
             {
                 if (span.markup == markup && !span.closed)
                 {
@@ -183,9 +187,8 @@ namespace TalkBox
                 }
             }
 
-            spans.Add(new MetaSpan(markup, markValue, index));
+            metaSpans.Add(new MetaSpan(markup, markValue, index));
         }
-
 
         public void Close(string markup, int index)
         {
@@ -200,7 +203,8 @@ namespace TalkBox
 
         public void Close(Span.Markup markup, int index)
         {
-            foreach (MetaSpan span in spans)
+            compiled = false;
+            foreach (MetaSpan span in metaSpans)
             {
                 if (span.markup == markup && !span.closed)
                 {
@@ -213,7 +217,8 @@ namespace TalkBox
 
         public void Close(int index)
         {
-            foreach (MetaSpan span in spans)
+            compiled = false;
+            foreach (MetaSpan span in metaSpans)
             {
                 if (!span.closed)
                 {
@@ -224,6 +229,7 @@ namespace TalkBox
 
         public void SetString(string text)
         {
+            compiled = false;
             txt = text;
         }
 
@@ -236,10 +242,32 @@ namespace TalkBox
             UInt64 movedValue = value * move; // And this moves the value to the position of that last 1.
             return (Span.Markup)movedValue;
         }
+        #endregion
+
+        // Get a specific span.
+        public Span this[int i]
+        {
+            get
+            {
+                Compile();
+                return spans[i];
+            }
+        }
 
         public IEnumerator GetEnumerator()
         {
-            foreach (MetaSpan span in spans)
+            Compile();
+            foreach(Span span in spans)
+            {
+                yield return span;
+            }
+        }
+        
+        private void Compile()
+        {
+            if (compiled) return;
+            spans.Clear();
+            foreach (MetaSpan span in metaSpans)
             {
                 if (!span.closed) throw new ArgumentException("You need to close every tag");
             }
@@ -250,7 +278,7 @@ namespace TalkBox
                 Span.Markup type = Span.Markup.NONE;
 
                 bool colored = false;
-                foreach (MetaSpan s in spans)
+                foreach (MetaSpan s in metaSpans)
                 {
                     if (index >= s.start && index < s.end)
                     {
@@ -277,9 +305,10 @@ namespace TalkBox
                     type |= type |= MoveValue(Span.Markup.COLOR, Span.MarkValue.BLACK);
                 }
                 Span span = new Span(type, txt.Substring(index, end - index));
-                yield return span;
+                spans.Add(span);
                 index = end;
             }
+            compiled = true;
         }
     }
 }

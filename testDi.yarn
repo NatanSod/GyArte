@@ -2,7 +2,17 @@ title: Start
 position: 57,-145
 ---
 Natan: Time for some wacky testing!
-Natan: We begin with a slow line. #slow
-Natan: Then we move on to a normal line.
-Natan: And finally, we finnish with a fast line. #fast
+Natan: Pick an option. #last
+-> Option nr 1, normal option.
+    Natan: You picked option 1. 
+-> Option nr 2, unselectable. #lock:false
+    Natan: You somehow picked a locked option.
+-> Option nr 3, a unlocked locked option. #lock:true
+    Natan: You picked option 3.
+-> Option nr 4, hidden. #hide:false
+    Natan: You somehow picked a hidden option.
+-> Option nr 5, another normal option.
+    Natan: You picked option 5.
+-> Option nr 6, a shown hidden option #hide:true
+    Natan: You picked option 6.
 ===

@@ -144,7 +144,7 @@ namespace TalkBox
 
         public Tag lineTags { get; private set; }
 
-        private SpanCollection markups = new SpanCollection();
+        private SpanCollection? markups = null;
 
         public TLine(string text, string? speaker, bool isOption, int indent, int nr, string[]? tags)
         {
@@ -166,12 +166,15 @@ namespace TalkBox
             line = tLine.line;
             t = tLine.t;
             s = tLine.s;
+            
             lineTags = tLine.lineTags;
             statement = tLine.statement;
         }
 
         public SpanCollection GetLine()
         {
+            if (markups != null) return markups;
+            markups = new SpanCollection();
             string text = t;
 
             for (int i = 0; i < text.Length; i++)

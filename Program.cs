@@ -32,6 +32,7 @@ namespace GyArte
                 Raylib.DrawRectangle(800 -25, -25, 50, 50, Color.RED);
                 Raylib.DrawRectangle(-25, 600 -25, 50, 50, Color.RED);
                 Raylib.DrawRectangle(800 -25, 600 -25, 50, 50, Color.BLUE);
+                Raylib.DrawText(Master.updates.ToString(), 50, 30, 20, Color.BLACK);
 
                 Raylib.EndDrawing();
             }

@@ -16,11 +16,19 @@ namespace GyArte
         public string dialogue = String.Empty;
         DialogueRunner? dr;
         IEnumerator<TLineCollection?>? LineGetter;
-        DialogueDisplay dd = new DialogueDisplay(new Vector2(50, 400), new Vector2(700, 90), 10, 5, new Scales(30, 20, 10), 30, new Scales(80, 30, 10));
+        DialogueDisplay dd;
         bool waiting = false;
         bool auto = false;
         List<int> choices = new List<int>();
         int choice = 0;
+
+        public DialogueHandler()
+        {
+            DebugTextBox dBox = new DebugTextBox(new Vector2(50, 400), new Vector2(700, 90), 10, 5, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
+            DebugTextBox nBox = new DebugTextBox(new Vector2(60, 345), new Vector2(0, 0), 3, 4, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
+            DebugTextBox oBox = new DebugTextBox(new Vector2(55, 180), new Vector2(0, 0), 3, 4, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
+            dd = new DialogueDisplay(dBox, nBox, oBox, new Scale(80, 30, 10));
+        }
 
         protected override void Start()
         {
@@ -49,9 +57,10 @@ namespace GyArte
                 if (choices.Count != 0)
                 {
                     // Pick an option.
-                    if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                    if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE) && choices[choice] >= 0)
                     {
                         // Select the option and get the next line.
+
                         dr.PickOption(choices[choice]);
                         choice = 0;
                         choices.Clear();
@@ -63,11 +72,11 @@ namespace GyArte
                         // Scroll through which options to select.
                         if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) || Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
                         {
-                            choice++;
+                            choice--;
                         }
                         if (Raylib.IsKeyPressed(KeyboardKey.KEY_S) || Raylib.IsKeyPressed(KeyboardKey.KEY_DOWN))
                         {
-                            choice--;
+                            choice++;
                         }
                         choice = (choice + choices.Count) % choices.Count;
                     }
@@ -145,6 +154,7 @@ namespace GyArte
                             {
                                 // This line is to be displayed, but not selectable.
                                 dd.AddOption(line, false);
+                                choices.Add(-i); // In order to still be able to hover over them but not select them, I did this.
                             }
                             // Else, this line is not to be displayed.
                             i++;
@@ -159,7 +169,7 @@ namespace GyArte
                         }
 
                         auto = false;
-                        choice = currentLine.lines.Length;
+                        choice = 0;
                     }
                 }
                 else
@@ -173,267 +183,6 @@ namespace GyArte
                 // The dialogue has ended (It might also not exist, but that should never happen).
                 LineGetter = null;
                 dr = null;
-            }
-        }
-
-        struct Scales
-        {
-            public int big { get; private set; }
-            public int medium { get; private set; }
-            public int small { get; private set; }
-
-            public Scales(int big, int medium, int small)
-            {
-                this.big = big;
-                this.medium = medium;
-                this.small = small;
-            }
-
-            /// <summary>
-            /// Get text size
-            /// </summary>
-            /// <param name="size"></param>
-            /// <returns></returns>
-            public int Get(Span.MarkValue size)
-            {
-                if (size == Span.MarkValue.BIG)
-                    return big;
-                else if (size == Span.MarkValue.SMALL)
-                    return small;
-                else
-                    return medium;
-            }
-
-            /// <summary>
-            /// Get how many symbols will be displayed in 60 frames.
-            /// </summary>
-            /// <param name="tag"></param>
-            /// <returns></returns>
-            public float Get(Tag tag)
-            {
-                switch ((tag & Tag.Tags.SPEED | Tag.Tags.METAMASK) ^ Tag.Tags.METAMASK)
-                {
-                    case Tag.Tags.FAST:
-                        return big / 60f;
-                    default:
-                    case Tag.Tags.NORM:
-                        return medium / 60f;
-                    case Tag.Tags.SLOW:
-                        return small / 60f;
-                }
-            }
-        }
-
-        class DialogueDisplay
-        {
-            TLine? currentLine;
-            SpanCollection? currentSpans;
-            TextLayout layout = new TextLayout(20);
-            Vector2 textOrigin;
-            Vector2 textArea;
-            Scales fontSize;
-            int lineHeight;
-            int margin;
-            int border;
-            Scales symbolBase;
-            Scales textSpeed;
-            float progress = 0;
-            TextBox text = new TextBox();
-            TextBox name = new TextBox();
-            List<(TextBox, bool)> options = new List<(TextBox, bool)>();
-
-            /// <summary>
-            /// These are a lot of parameters, ay?
-            /// </summary>
-            /// <param name="textOrigin">The top left coordinate of where the first letter will be drawn.</param>
-            /// <param name="textArea">The size of the area that is allowed to include text.</param>
-            /// <param name="margin">The "radius" of extra background colour outside the text area.</param>
-            /// <param name="border">The "radius" of border colour outside the margin.</param>
-            /// <param name="fontSize">Self explanatory.</param>
-            /// <param name="lineHeight">Self explanatory.</param>
-            /// <param name="monospace">Should the font be displayed as if monospaced?</param>
-            /// <param name="symbolMargin">The amount of additional pixels between each symbol</param>
-            public DialogueDisplay(Vector2 textOrigin, Vector2 textArea, int margin, int border, Scales fontSize, int lineHeight, Scales textSpeed)
-            {
-                this.fontSize = fontSize;
-                this.textSpeed = textSpeed;
-                this.lineHeight = lineHeight;
-                this.textArea = textArea;
-                this.margin = margin;
-                this.border = border;
-                this.textOrigin = textOrigin;
-
-                int aaWidth = Raylib.ImageText("aa", fontSize.medium, Color.BLACK).width;
-                int aWidth = Raylib.ImageText("a", fontSize.medium, Color.BLACK).width * 2;
-                int symbolMargin = (aaWidth - aWidth) >> 1;
-                layout = new TextLayout((int)textArea.X, Raylib.ImageText(" ", fontSize.medium, Color.BLACK).width, symbolMargin);
-
-                // This is all for the purpose of making the bottom of big, medium, and small symbols line up.
-                unsafe
-                {
-                    // returns the 0 base distance from the top of the bottom most part of the symbol 'I'.
-                    int GetBase(int size)
-                    {
-                        Image iImage = Raylib.ImageText("I", size, Color.BLACK);
-                        Color* colors = Raylib.LoadImageColors(iImage);
-
-                        int center = iImage.width >> 1;
-                        for (int i = iImage.height - 1; i >= 0; i--)
-                        {
-                            if (colors[i * iImage.width + center].a != 0)
-                            {
-                                return i + 1;
-                            }
-                        }
-                        return -1; // To make it apparent that things went wrong.
-                    }
-                    symbolBase = new Scales(GetBase(this.fontSize.big), GetBase(this.fontSize.medium), GetBase(this.fontSize.small));
-                }
-            }
-
-            public bool done { get; private set; } = false;
-
-            public void SetLine(TLine line)
-            {
-                currentLine = line;
-                currentSpans = currentLine.GetLine();
-                progress = 0;
-                done = false;
-
-                layout.Clear();
-                foreach (Span span in currentSpans)
-                {
-                    foreach (char symbol in span.contents)
-                    {
-                        if (symbol == ' ')
-                        {
-                            layout.Add(null);
-                        }
-                        else if (symbol == '\n')
-                        {
-                            layout.Add(-1);
-                        }
-                        else
-                        {
-                            int width = Raylib.ImageText(symbol.ToString(), fontSize.Get(span.GetValue(Span.Markup.SIZE)), Color.BLACK).width;
-
-                            layout.Add(width);
-                        }
-                    }
-                }
-            }
-
-            public void SkipLine()
-            {
-                if (currentLine != null)
-                {
-                    progress = currentLine.t.Length;
-                    done = true;
-                }
-            }
-
-            public void EndOptions()
-            {
-                options.Clear();
-            }
-
-            public void AddOption(TLine option, bool selectable)
-            {
-                options.Add((new TextBox(option), selectable));
-            }
-
-            public void Display()
-            {
-                if (currentLine == null) return;
-
-                if (!done)
-                {
-                    if (progress < currentLine.t.Length)
-                    {
-                        progress += textSpeed.Get(currentLine.lineTags);
-                    }
-                    else
-                    {
-                        done = true;
-                    }
-                }
-
-                int i = 0;
-
-                // This is, for the time being, the backdrop of the dialogue.
-                Raylib.DrawRectangle((int)textOrigin.X - border - margin,
-                                     (int)textOrigin.Y - border - margin,
-                                     (int)textArea.X + (border + margin) * 2,
-                                     (int)textArea.Y + (border + margin) * 2,
-                                     Color.SKYBLUE);
-                Raylib.DrawRectangle((int)textOrigin.X - margin,
-                                     (int)textOrigin.Y - margin,
-                                     (int)textArea.X + margin * 2,
-                                     (int)textArea.Y + margin * 2,
-                                     Color.BLUE);
-
-                SpanCollection spans = currentLine.GetLine();
-                foreach (Span span in spans)
-                {
-                    Span.MarkValue mSize = span.GetValue(Span.Markup.SIZE);
-                    Color currentColor = new Color(span.red, span.green, span.blue, span.alpha);
-
-                    int currentFontSize = fontSize.Get(mSize);
-                    int currentBaseOffset = symbolBase.medium - symbolBase.Get(mSize);
-
-                    if (mSize == Span.MarkValue.BIG)
-                    {
-                        currentFontSize = fontSize.big;
-                    }
-                    else if (mSize == Span.MarkValue.SMALL)
-                    {
-                        currentFontSize = fontSize.small;
-                    }
-
-                    if (i > progress) break;
-                    foreach (char symbol in span.contents)
-                    {
-                        if (i > progress) break;
-                        if (symbol == ' ' || symbol == '\n')
-                        {
-                            i++;
-                            continue;
-                        }
-
-                        Vector2 position = layout[i] * (new Vector2(1, lineHeight)) + textOrigin;
-
-                        // This is to help check that the symbols are spaced properly.
-                        // int width = Raylib.ImageText(symbol.ToString(), currentFontSize, Color.BLACK).width;
-                        // Raylib.DrawRectangle((int)position.X, (int)position.Y + currentBaseOffset, width, currentFontSize, Color.RED);
-
-                        Raylib.DrawText(symbol.ToString(),
-                                        (int)position.X,
-                                        (int)position.Y + currentBaseOffset,
-                                        currentFontSize,
-                                        currentColor);
-
-
-                        i++;
-                    }
-                }
-            }
-
-            public void Display(int option)
-            {
-
-            }
-        }
-
-        class TextBox
-        {
-            public TextBox()
-            {
-                // Unfinished.
-            }
-
-            public TextBox(TLine text)
-            {
-                // Unfinished.
             }
         }
     }
