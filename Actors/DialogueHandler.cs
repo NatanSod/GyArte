@@ -44,7 +44,7 @@ namespace GyArte
             Vector2 oArea = new Vector2(0, 0);
             Vector2 oMargin = new Vector2(4, 3);
             Vector2 oOrigin = new Vector2(Render.Width - 11 - oMargin.X - border.X, dOrigin.Y - dMargin.Y - oMargin.Y - border.Y * 2 - 20);
-            DebugTextBox oBox = new DebugTextBox(oOrigin, new(1, 1), oArea, border, oMargin, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
+            DebugTextBox oBox = new DebugTextBox(oOrigin, new(1, 1), oArea, oMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
             dd = new DialogueDisplay(dBox, nBox, oBox, new Scale(80, 30, 10));
         }
 
