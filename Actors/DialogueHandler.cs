@@ -11,6 +11,7 @@ namespace GyArte
     class DialogueHandler : Actor
     {
         // TODO: Make a function that ends dialogue in a more elegant and official fashion.
+        // TODO: If I've gone insane, make it possible to select options with the mouse.
 
         CommandManager cm = new CommandManager();
         public string dialogue = String.Empty;
@@ -24,9 +25,26 @@ namespace GyArte
 
         public DialogueHandler()
         {
-            DebugTextBox dBox = new DebugTextBox(new Vector2(50, 400), new Vector2(700, 90), 10, 5, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
-            DebugTextBox nBox = new DebugTextBox(new Vector2(60, 345), new Vector2(0, 0), 3, 4, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
-            DebugTextBox oBox = new DebugTextBox(new Vector2(55, 180), new Vector2(0, 0), 3, 4, Raylib.GetFontDefault(), new Scale(30, 20, 10), 4, 4, 8);
+            Font font = Raylib.GetFontDefault();
+            Scale textSize = new Scale(15, 10, 5);
+            Vector2 border = new Vector2(2, 2);
+            int spaceWidth = 2; 
+            int lineSpacing = 3;
+            int layoutSpacing = 4;
+            
+            int dLines = 4;
+            Vector2 dArea = new Vector2(320, textSize.Medium * dLines + lineSpacing * (dLines - 1));
+            Vector2 dMargin = new Vector2(14, 7);
+            Vector2 dOrigin = new Vector2(dMargin.X + border.X, Render.Height - dArea.Y - dMargin.Y - border.Y);
+            DebugTextBox dBox = new DebugTextBox(dOrigin, new(0, 0), dArea, dMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
+            Vector2 nArea = new Vector2(0, textSize.Medium);
+            Vector2 nMargin = new Vector2(5, 3);
+            Vector2 nOrigin = new Vector2(44 + nMargin.X + border.X, Render.Height - textSize.Medium - dArea.Y - (dMargin.Y + border.Y) * 2 - nMargin.Y); 
+            DebugTextBox nBox = new DebugTextBox(nOrigin, new(0, 0), nArea, nMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing); 
+            Vector2 oArea = new Vector2(0, 0);
+            Vector2 oMargin = new Vector2(4, 3);
+            Vector2 oOrigin = new Vector2(Render.Width - 11 - oMargin.X - border.X, dOrigin.Y - dMargin.Y - oMargin.Y - border.Y * 2 - 20);
+            DebugTextBox oBox = new DebugTextBox(oOrigin, new(1, 1), oArea, border, oMargin, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
             dd = new DialogueDisplay(dBox, nBox, oBox, new Scale(80, 30, 10));
         }
 
@@ -186,5 +204,4 @@ namespace GyArte
             }
         }
     }
-
 }

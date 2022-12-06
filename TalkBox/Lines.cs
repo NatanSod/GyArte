@@ -132,6 +132,7 @@ namespace TalkBox
     // A line that contains text in the form of dialogue or an option to be displayed
     class TLine : Line
     {
+        // TODO: Maybe make a version of GetLine() for the speaker/subject (s).
         /// <summary>
         /// Text to display.
         /// </summary>

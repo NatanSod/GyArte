@@ -68,14 +68,18 @@ namespace GyArte
         /// The area of the text box. Used by <see cref="DialogueDisplay"/>
         /// </summary>
         public Vector2 Area { get; }
+
+        public Vector2 TrueOrigin { get; }
+        
+        public Vector2 TrueArea { get; }
         /// <summary>
         /// The distance from the "inside" of the text box to the border.
         /// </summary>
-        public int Margin { get; }
+        public Vector2 Margin { get; }
         /// <summary>
         /// The radius of the border.
         /// </summary>
-        public int Border { get; }
+        public Vector2 Border { get; }
         /// <summary>
         /// The font.
         /// </summary>
@@ -150,10 +154,20 @@ namespace GyArte
 
     class DebugTextBox : ITextBox
     {
-        public Vector2 Origin { get; private set; }
-        public Vector2 Area { get; private set; }
-        public int Margin { get; private set; }
-        public int Border { get; private set; }
+        // This is for the purpose of having the box extend in either combination of up or down and left or right.
+        // _trueOrigin is the origin which the box changes around, while Origin is the starting point of the text.
+        // _transformOrigin is what part of the box that it extends from, (0, 0) is top left and (1, 1) is bottom right
+        private Vector2 _trueOrigin;
+        private Vector2 _transformOrigin;
+        private Vector2 _area;
+        private Vector2 _currentArea;
+        public Vector2 Origin { get => _trueOrigin - _currentArea * _transformOrigin; }
+        public Vector2 Area { get => _area; }
+        public Vector2 TrueOrigin { get => Origin - Margin - Border; }
+        public Vector2 TrueArea { get => _currentArea + (Margin + Border) * 2; }
+
+        public Vector2 Margin { get; private set; }
+        public Vector2 Border { get; private set; }
         public Font TextFont { get; private set; }
         public int SpaceWidth { get; private set; }
         public int LineSpacing { get; private set; }
@@ -162,10 +176,13 @@ namespace GyArte
         public Scale FontSize { get; private set; }
         public Scale SymbolBase { get; private set; }
 
-        public DebugTextBox(Vector2 origin, Vector2 area, int margin, int border, Font textFont, Scale fontSize, int letterSpacing, int lineSpacing, int layoutSpacing)
+
+        public DebugTextBox(Vector2 origin, Vector2 center, Vector2 area, Vector2 margin, Vector2 border, Font textFont, Scale fontSize, int letterSpacing, int lineSpacing, int layoutSpacing)
         {
-            Origin = origin;
-            Area = area;
+            _trueOrigin = origin;
+            _transformOrigin = center;
+            _currentArea = area;
+            _area = area;
             Margin = margin;
             Border = border;
             TextFont = textFont;
@@ -180,30 +197,23 @@ namespace GyArte
 
         public void Draw()
         {
-            Raylib.DrawRectangle((int)Origin.X - Border - Margin,
-                                 (int)Origin.Y - Border - Margin,
-                                 (int)Area.X + (Border + Margin) * 2,
-                                 (int)Area.Y + (Border + Margin) * 2,
+            Raylib.DrawRectangle((int)(Origin.X - Border.X - Margin.X),
+                                 (int)(Origin.Y - Border.Y - Margin.Y),
+                                 (int)(_currentArea.X + (Border.X + Margin.X) * 2),
+                                 (int)(_currentArea.Y + (Border.Y + Margin.Y) * 2),
                                  Color.SKYBLUE);
-            Raylib.DrawRectangle((int)Origin.X - Margin,
-                                 (int)Origin.Y - Margin,
-                                 (int)Area.X + Margin * 2,
-                                 (int)Area.Y + Margin * 2,
+            Raylib.DrawRectangle((int)(Origin.X - Margin.X),
+                                 (int)(Origin.Y - Margin.Y),
+                                 (int)(_currentArea.X + Margin.X * 2),
+                                 (int)(_currentArea.Y + Margin.Y * 2),
                                  Color.BLUE);
         }
 
         public void Draw(TextLayout layout)
         {
-            Raylib.DrawRectangle((int)Origin.X - Border - Margin,
-                                 (int)Origin.Y - Border - Margin,
-                                 (int)layout.Width + (Border + Margin) * 2,
-                                 (int)layout.Height - LineSpacing + (Border + Margin) * 2,
-                                 Color.SKYBLUE);
-            Raylib.DrawRectangle((int)Origin.X - Margin,
-                                 (int)Origin.Y - Margin,
-                                 (int)layout.Width + Margin * 2,
-                                 (int)layout.Height - LineSpacing + Margin * 2,
-                                 Color.BLUE);
+            _currentArea = new Vector2(layout.Width, layout.Height - LineSpacing);
+
+            Draw();
         }
 
         public int[] Draw(List<TextLayout> layouts, int? highlight = null)
@@ -221,16 +231,9 @@ namespace GyArte
             }
             height -= LayoutSpacing;
 
-            Raylib.DrawRectangle((int)Origin.X - Border - Margin,
-                                 (int)Origin.Y - Border - Margin,
-                                 (int)width + (Border + Margin) * 2,
-                                 (int)height + (Border + Margin) * 2,
-                                 Color.SKYBLUE);
-            Raylib.DrawRectangle((int)Origin.X - Margin,
-                                 (int)Origin.Y - Margin,
-                                 (int)width + Margin * 2,
-                                 (int)height + Margin * 2,
-                                 Color.BLUE);
+            _currentArea = new Vector2(width, height);
+
+            Draw();
 
             if (highlight != null)
             {

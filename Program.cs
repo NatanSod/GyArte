@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Raylib_cs;
 using TalkBox;
 using GameMaster;
+using System.Numerics;
 
 namespace GyArte
 {
@@ -12,8 +13,7 @@ namespace GyArte
     {
         static void Main(string[] args)
         {
-            Raylib.SetTraceLogLevel(TraceLogLevel.LOG_NONE);
-            Raylib.InitWindow(800, 600, "Game");
+            Render.Initialise(352, 270, 2);
             Master gm = new Master();
             // gm.Create<Player>("Player");
             gm.Create<DialogueHandler>("DialogueHandler")()?.BeginDialogue("testDi");
@@ -22,19 +22,22 @@ namespace GyArte
 
             while (!Raylib.WindowShouldClose())
             {
-                Raylib.BeginDrawing();
+                Render.BeginDrawing();
 
-                Raylib.ClearBackground(Color.WHITE);
+                Render.DrawAt(Render.Layer.DEBUG, 0);
+                Raylib.DrawRectangle(-25, -25, 50, 50, Color.MAGENTA);
+                Raylib.DrawRectangle(Render.Width - 25, -25, 50, 50, Color.GREEN);
+                Raylib.DrawRectangle(-25, Render.Height - 25, 50, 50, Color.GREEN);
+                Raylib.DrawRectangle(Render.Width - 25, Render.Height - 25, 50, 50, Color.YELLOW);
+                Raylib.DrawText(Master.updates.ToString(), 50, 30, 10, Color.BLACK);
+                Raylib.DrawFPS(50, 40);
+                Render.DoneDraw();
+
 
                 gm.Update();
 
-                Raylib.DrawRectangle(-25, -25, 50, 50, Color.RED);
-                Raylib.DrawRectangle(800 -25, -25, 50, 50, Color.RED);
-                Raylib.DrawRectangle(-25, 600 -25, 50, 50, Color.RED);
-                Raylib.DrawRectangle(800 -25, 600 -25, 50, 50, Color.BLUE);
-                Raylib.DrawText(Master.updates.ToString(), 50, 30, 20, Color.BLACK);
 
-                Raylib.EndDrawing();
+                Render.EndDrawing();
             }
         }
     }

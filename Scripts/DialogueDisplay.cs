@@ -12,6 +12,11 @@ namespace GyArte
     /// </summary>
     class DialogueDisplay
     {
+        // TODO: Make options display the subject (TLine.s) of options as well.
+        // TODO: Make it display images of the speaker.
+        // TODO: Make it display one of those "The line is done, press something to continue" symbols when you can continue. (ITextBox should handle displaying it.)
+        // TODO: If I've gone insane, make it able to split lines that are too long for the box into multiple parts.
+
         TLine? currentLine;
         SpanCollection? currentSpans;
         List<(TLine, bool)> options = new List<(TLine, bool)>();
@@ -114,6 +119,7 @@ namespace GyArte
 
             int i = 0;
 
+            Render.DrawAt(Render.Layer.UI, 1);
             nameBox.Draw(nameLayout);
 
             if (currentLine.s != null)
@@ -140,7 +146,8 @@ namespace GyArte
                     i++;
                 }
             }
-
+            Render.DoneDraw();
+            Render.DrawAt(Render.Layer.UI, 0);
             dialogueBox.Draw();
             i = 0;
 
@@ -184,6 +191,7 @@ namespace GyArte
                                     currentColor);
                     i++;
                 }
+            Render.DoneDraw();
             }
         }
 
@@ -191,6 +199,7 @@ namespace GyArte
         {
             Display();
 
+            Render.DrawAt(Render.Layer.UI, 0);
             int[] origins = optionBox.Draw(optionLayouts, option);
             for (int i = 0; i < origins.Length; i++)
             {
@@ -251,6 +260,7 @@ namespace GyArte
                     }
                 }
             }
+            Render.DoneDraw();
         }
 
         public static TextLayout MakeLayout(SpanCollection spanCollection, ITextBox textBox)

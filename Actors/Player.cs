@@ -7,6 +7,7 @@ using GameMaster;
 
 namespace GyArte
 {
+    // TODO: Make the player character unresponsive when dialogue is happening.
     class Player : Actor
     {
         enum State
