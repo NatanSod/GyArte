@@ -1,0 +1,8 @@
+0 - 
+Added the commit file. This file is to write more about the changes and additions in each commit, because I have a tendency to get off track and then do something else. This will allow me to write all the information I want. New text will be added to the end of this file in the future.
+
+Made the trail class. It is used to create a trail behind the leading party member for the trailing party members to follow. The class has also been made able to fulfill that purpose. In the future I might make a modified version that I use to make trails for the NPCs to follow while they go about their day, but that is a low priority.
+
+Found the reason for the wacky framerate issues that happen at regular intervals even though, currently, each frame should be remarkably similar. I was wondering if I should use Raylib to unload the texture2Ds and RenderTexture2Ds that I use for the layer effect, because Raylib seems to also be for C++ and they usually need to do that manually. Well, now I have my answer, I very much need to unload them.
+
+Not really an update but I decided to test if the GameMaster delegates that return an Actor actually allowed them to be collected by garbage collection like I hoped. I found that the very act of calling the delegate, and that alone, made it unable to be picked up by garbage collection, even if the delegate itself is forgotten. I'm going to try simply ignoring it until that no longer becomes possible.

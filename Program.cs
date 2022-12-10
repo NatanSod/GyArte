@@ -15,8 +15,8 @@ namespace GyArte
         {
             Render.Initialise(352, 270, 2);
             Master gm = new Master();
-            // gm.Create<Player>("Player");
-            gm.Create<DialogueHandler>("DialogueHandler")()?.BeginDialogue("testDi");
+            gm.Create<Player>("Player");
+            // gm.Create<DialogueHandler>("DialogueHandler")()?.BeginDialogue("testDi");
 
             Raylib.SetTargetFPS(60);
 

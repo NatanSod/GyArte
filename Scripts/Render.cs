@@ -134,8 +134,14 @@ namespace GyArte
             {
                 Raylib.DrawTexturePro(drawing.Texture, new Rectangle(0, 0, Width, -Height), new Rectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight), Vector2.Zero, 0, Color.WHITE);
             }
-            drawings.Clear();
             Raylib.EndDrawing();
+            // After having having been drawn to the screen and drawing has ended, "Kill" every single drawing.
+            // Letting them live was found to cause major framerate issues.
+            foreach (Drawing drawing in drawings)
+            {
+                drawing.Kill();
+            }
+            drawings.Clear();
         }
 
         private class Drawing
@@ -143,11 +149,18 @@ namespace GyArte
             public Layer Layer { get; private set; }
             public int Distance { get; private set; }
             public Texture2D Texture { get; private set; }
-            public Drawing (Layer layer, int distance, Texture2D texture)
+            public RenderTexture2D renderTexture;
+            public Drawing (Layer layer, int distance, RenderTexture2D texture)
             {
                 Layer = layer;
                 Distance = distance;
-                Texture = texture;
+                renderTexture = texture;
+                Texture = texture.texture;
+            }
+            public void Kill()
+            {
+                Raylib.UnloadTexture(Texture);
+                Raylib.UnloadRenderTexture(renderTexture);
             }
         }
 
@@ -187,7 +200,7 @@ namespace GyArte
                 }
                 i++;
             }
-            drawings.Insert(i, new Drawing(_currentLayer, _currentDistance, capture.texture));
+            drawings.Insert(i, new Drawing(_currentLayer, _currentDistance, capture));
             _currentLayer = Layer.NONE;
         }
     }
