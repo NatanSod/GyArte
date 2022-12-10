@@ -1,4 +1,4 @@
-0 - 
+0 - Made trail and fixed layers (see commits.txt 0)
 Added the commit file. This file is to write more about the changes and additions in each commit, because I have a tendency to get off track and then do something else. This will allow me to write all the information I want. New text will be added to the end of this file in the future.
 
 Made the trail class. It is used to create a trail behind the leading party member for the trailing party members to follow. The class has also been made able to fulfill that purpose. In the future I might make a modified version that I use to make trails for the NPCs to follow while they go about their day, but that is a low priority.
