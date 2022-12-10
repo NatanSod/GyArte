@@ -6,3 +6,15 @@ Made the trail class. It is used to create a trail behind the leading party memb
 Found the reason for the wacky framerate issues that happen at regular intervals even though, currently, each frame should be remarkably similar. I was wondering if I should use Raylib to unload the texture2Ds and RenderTexture2Ds that I use for the layer effect, because Raylib seems to also be for C++ and they usually need to do that manually. Well, now I have my answer, I very much need to unload them.
 
 Not really an update but I decided to test if the GameMaster delegates that return an Actor actually allowed them to be collected by garbage collection like I hoped. I found that the very act of calling the delegate, and that alone, made it unable to be picked up by garbage collection, even if the delegate itself is forgotten. I'm going to try simply ignoring it until that no longer becomes possible.
+
+
+1 - Fix Trail direction and vector to int
+I gave the Player class a function to turn a vector into an integer that represents a direction. Here, I even made a chart.
+7   8   9
+  \ | /
+4 - 5 - 6   (It's based on the configuration of the number-pad on most keyboards)
+  / | \
+1   2   3
+In the future, this will be used to get the correct sprite from a class with an index of sprites. Speaking of which, I might want to start working on that.
+While doing that I also noticed that the Trail classes GetDirectionAt didn't actually work, so I had to fix it.
+Also. I forgot to mention that a number will be included in the commit message which relates to the section of this file that includes more information.

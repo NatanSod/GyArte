@@ -146,7 +146,7 @@ namespace GyArte
             }
             else
             {
-                int i = 0;
+                int i = 1;
                 // Increment i until it reaches the max
                 while (i < positionKeys.Count && positionKeys[i].Creation < timePoint)
                 {
@@ -154,8 +154,8 @@ namespace GyArte
                 }
 
 
-                Vector3 pos1 = positionKeys[i].Pos;
-                Vector3 pos2 = positionKeys[i + 1].Pos;
+                Vector3 pos1 = positionKeys[i - 1].Pos;
+                Vector3 pos2 = positionKeys[i].Pos;
                 Vector3 dir = Vector3.Normalize(pos2 - pos1);
                 return dir;
             }
