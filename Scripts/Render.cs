@@ -148,18 +148,16 @@ namespace GyArte
         {
             public Layer Layer { get; private set; }
             public int Distance { get; private set; }
-            public Texture2D Texture { get; private set; }
-            public RenderTexture2D renderTexture;
+            public Texture2D Texture { get => renderTexture.texture; }
+            private RenderTexture2D renderTexture;
             public Drawing (Layer layer, int distance, RenderTexture2D texture)
             {
                 Layer = layer;
                 Distance = distance;
                 renderTexture = texture;
-                Texture = texture.texture;
             }
             public void Kill()
             {
-                Raylib.UnloadTexture(Texture);
                 Raylib.UnloadRenderTexture(renderTexture);
             }
         }

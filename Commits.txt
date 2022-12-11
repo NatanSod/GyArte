@@ -18,3 +18,14 @@ I gave the Player class a function to turn a vector into an integer that represe
 In the future, this will be used to get the correct sprite from a class with an index of sprites. Speaking of which, I might want to start working on that.
 While doing that I also noticed that the Trail classes GetDirectionAt didn't actually work, so I had to fix it.
 Also. I forgot to mention that a number will be included in the commit message which relates to the section of this file that includes more information.
+
+
+2 - Made SpriteSheet, changed vector to int
+I made the sprite sheet class and a bunch of functionality from it. It should be done. When loading an image (in png format, always) it needs a complimentary json file that describes metadata. 
+I realised I don't need a value for lack of direction because that should never happen, and I don't want to make 8 different animations for walking (5 if I mirror them), so I'm just going to make 4 (3 if I mirror them) and change the vector to int to match that.
+3   4   1
+  \ | /
+3 - X - 1  (Based on a clock, with the highest number on the top)
+  / | \
+3   2   1
+The reason there are three 1s and 3s each is because I want it to favour the sprites of horizontal movement, though I might change that if it looks bad.

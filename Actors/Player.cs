@@ -110,7 +110,7 @@ namespace GyArte
         //         y=-1
         //    x=-1  0  x=1
         //         y=1
-        // Int:
+        // Int (old):
         //    +2   +3   +4
         //      7   8   9
         //        \ | /
@@ -118,24 +118,33 @@ namespace GyArte
         //        / | \
         //      1   2   3
         //   -4    -3   -2
+        // Int (new):
+        //      3   4   1
+        //        \ | /
+        //      3 - X - 1  (Right now, it prioritises the horizontal moving sprites. I might change that.)
+        //        / | \
+        //      3   2   1
         // (These are 2d only.)
         int DirectionIndexFromVector(Vector3 vector)
         {
-            int direction = 5;
-            float tolerance = - MathF.Sin(60);
-
             vector = Vector3.Normalize(new Vector3(vector.X, vector.Y, 0));
+            float tolerance = -MathF.Sin(60);
+            // int direction = 5;
+
 
             if (MathF.Abs(vector.X) >= tolerance)
             {
-                direction += vector.X > 0 ? 1 : -1;
+                return vector.X > 0 ? 1 : 3;
+                // direction += vector.X > 0 ? 1 : -1;
             }
             if (MathF.Abs(vector.Y) >= tolerance)
             {
-                direction += vector.Y > 0 ? -3 : 3;
+                return vector.Y > 0 ? 2 : 4;
+                // direction += vector.Y > 0 ? -3 : 3;
             }
 
-            return direction;
+            throw new ArgumentException("That vector does not include a direction.");
+            // return direction;
         }
     }
 }
