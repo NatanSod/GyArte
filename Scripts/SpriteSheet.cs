@@ -69,6 +69,7 @@ namespace GyArte
 
         public Animation(AnimationMeta meta, Texture2D sheet)
         {
+            Name = meta.Name;
             Height = meta.Height;
             Width = meta.Width;
             OriginX = meta.OriginX;
@@ -82,7 +83,7 @@ namespace GyArte
                     frames[dir, frm] = Raylib.LoadRenderTexture(meta.Width, meta.Height);
                     Raylib.BeginTextureMode(frames[dir, frm]);
                     Raylib.ClearBackground(Color.BLANK);
-                    Raylib.DrawTexturePro(sheet, new Rectangle(OriginX, OriginY, Width, -Height), new Rectangle(0, 0, Width, Height), Vector2.Zero, 0, Color.WHITE);
+                    Raylib.DrawTexturePro(sheet, new Rectangle(meta.StartX + frm * Width, meta.StartY + dir * Height, Width, -Height), new Rectangle(0, 0, Width, Height), Vector2.Zero, 0, Color.WHITE);
                     Raylib.EndTextureMode();
                 }
             }

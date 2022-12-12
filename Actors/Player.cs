@@ -25,13 +25,22 @@ namespace GyArte
         }
         public Player()
         {
+            spriteSheet = new SpriteSheet("Test");
+            stand = spriteSheet.GetAnimation("stand");
+            walk = spriteSheet.GetAnimation("walk");
+
             position = Vector3.Zero;
             velocity = Vector3.Zero;
+            
             trail = new Trail(() => position, (() => currentTime), 25 * 4 / speed);
         }
 
         float currentTime = 0; // It starts at -1 so that the first time it's checked, right after it's been incremented, it's equal to 0.
         Vector3 previousDirection = Vector3.Zero; // The direction the character moved in last frame.
+        SpriteSheet spriteSheet;
+        Animation stand;
+        Animation walk;
+
 
         protected override void Update()
         {
@@ -100,7 +109,15 @@ namespace GyArte
                 Vector3 pos = trail.GetPositionAt(i * thirdLength);
                 Render.DrawAt(Render.Layer.MID_GROUND, (int)pos.Y);
                 Raylib.DrawRectangle((int)pos.X - 15, (int)pos.Y - 15, 30, 30, color);
-                Raylib.DrawText(DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength)).ToString(), (int)pos.X - 15, (int)pos.Y - 15, 30, Color.BLACK);
+                int direction = DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength));
+                if (velocity.Length() != 0)
+                {
+                    walk.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                }
+                else 
+                {
+                    stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                }
                 Render.DoneDraw();
             }
         }
@@ -119,11 +136,11 @@ namespace GyArte
         //      1   2   3
         //   -4    -3   -2
         // Int (new):
-        //      3   4   1
+        //      2   3   0
         //        \ | /
-        //      3 - X - 1  (Right now, it prioritises the horizontal moving sprites. I might change that.)
+        //      2 - X - 0  (Right now, it prioritises the horizontal moving sprites. I might change that.)
         //        / | \
-        //      3   2   1
+        //      2   1   0
         // (These are 2d only.)
         int DirectionIndexFromVector(Vector3 vector)
         {
@@ -134,16 +151,17 @@ namespace GyArte
 
             if (MathF.Abs(vector.X) >= tolerance)
             {
-                return vector.X > 0 ? 1 : 3;
+                return vector.X > 0 ? 0 : 2;
                 // direction += vector.X > 0 ? 1 : -1;
             }
             if (MathF.Abs(vector.Y) >= tolerance)
             {
-                return vector.Y > 0 ? 2 : 4;
+                return vector.Y > 0 ? 1 : 3;
                 // direction += vector.Y > 0 ? -3 : 3;
             }
 
-            throw new ArgumentException("That vector does not include a direction.");
+            return 1; // I will make this break properly when I can make a starting position for the trail or similar.
+            // throw new ArgumentException("That vector does not include a direction.");
             // return direction;
         }
     }

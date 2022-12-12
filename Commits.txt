@@ -28,4 +28,8 @@ I realised I don't need a value for lack of direction because that should never 
 3 - X - 1  (Based on a clock, with the highest number on the top)
   / | \
 3   2   1
-The reason there are three 1s and 3s each is because I want it to favour the sprites of horizontal movement, though I might change that if it looks bad.
+The reason there are three 1s and 3s each4 is because I want it to favour the sprites of horizontal movement, though I might change that if it looks bad.
+
+
+3 - Player uses SpriteSheet
+Player can now use SpriteSheet, though it doesn't really use animations yet. I mentioned in the commit where I added the test image and it's metadata that it was probably broken. Surprisingly enough, it was not. 
