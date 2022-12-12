@@ -65,7 +65,10 @@ namespace GyArte
         public int OriginX { get; private set; } // X and Y origin
         public int OriginY { get; private set; }
 
-        private RenderTexture2D[,] frames;
+        public int Facings { get => frames.Length; }
+        public int Frames { get => frames[0].Length; }
+
+        private RenderTexture2D[][] frames;
 
         public Animation(AnimationMeta meta, Texture2D sheet)
         {
@@ -75,13 +78,14 @@ namespace GyArte
             OriginX = meta.OriginX;
             OriginY = meta.OriginY;
 
-            frames = new RenderTexture2D[meta.Facings, meta.Frames];
+            frames = new RenderTexture2D[meta.Facings][];
             for (int dir = 0; dir < meta.Facings; dir++)
             {
+                frames[dir] = new RenderTexture2D[meta.Frames];
                 for (int frm = 0; frm < meta.Frames; frm++)
                 {
-                    frames[dir, frm] = Raylib.LoadRenderTexture(meta.Width, meta.Height);
-                    Raylib.BeginTextureMode(frames[dir, frm]);
+                    frames[dir][frm] = Raylib.LoadRenderTexture(meta.Width, meta.Height);
+                    Raylib.BeginTextureMode(frames[dir][frm]);
                     Raylib.ClearBackground(Color.BLANK);
                     Raylib.DrawTexturePro(sheet, new Rectangle(meta.StartX + frm * Width, meta.StartY + dir * Height, Width, -Height), new Rectangle(0, 0, Width, Height), Vector2.Zero, 0, Color.WHITE);
                     Raylib.EndTextureMode();
@@ -91,23 +95,22 @@ namespace GyArte
 
         public void Draw(int direction, int frame, int x, int y)
         {
-            Raylib.DrawTexture(frames[direction, frame].texture, x - OriginX, y - OriginY, Color.WHITE);
+            Raylib.DrawTexture(frames[direction][frame].texture, x - OriginX, y - OriginY, Color.WHITE);
         }
 
         public Texture2D GetTexture(int direction, int frame)
         {
-            return frames[direction, frame].texture;
+            return frames[direction][frame].texture;
         }
 
         // Unload everything.
         public void Kill()
         {
-            int frmNr = frames.GetLength(0);
             for (int dir = 0; dir < frames.Length; dir++)
             {
-                for (int frm = 0; frm < frmNr; frm++)
+                for (int frm = 0; frm < frames[dir].Length; frm++)
                 {
-                    Raylib.UnloadRenderTexture(frames[dir, frm]);
+                    Raylib.UnloadRenderTexture(frames[dir][frm]);
                 }
             }
         }

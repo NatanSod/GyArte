@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace GyArte
 {
-    internal class Program
+    static class Program
     {
         static void Main(string[] args)
         {
