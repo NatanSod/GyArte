@@ -32,4 +32,7 @@ The reason there are three 1s and 3s each4 is because I want it to favour the sp
 
 
 3 - Player uses SpriteSheet
-Player can now use SpriteSheet, though it doesn't really use animations yet. I mentioned in the commit where I added the test image and it's metadata that it was probably broken. Surprisingly enough, it was not. 
+Player can now use SpriteSheet, though it doesn't really use animations yet. I mentioned in the commit where I added the test image and it's metadata that it was probably broken. Surprisingly enough, it was not.
+
+4 - Messed up test sheet
+Scratch that previous one, I accidentally made the sprite for standing while looking left instead point to the right. How did I miss that?
