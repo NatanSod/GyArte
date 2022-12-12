@@ -1,0 +1,24 @@
+[
+    {
+        "Name": "stand",
+        "Frames" : 1,
+        "Facings" : 4,
+        "Width" : 30,
+        "Height" : 30,
+        "OriginX" : 15,
+        "OriginY" : 15,
+        "StartX" : 0,
+        "StartY" : 0
+    },
+    {
+        "Name": "walk",
+        "Frames" : 1,
+        "Facings" : 4,
+        "Width" : 30,
+        "Height" : 30,
+        "OriginX" : 15,
+        "OriginY" : 15,
+        "StartX" : 30,
+        "StartY" : 0
+    }
+]

@@ -21,9 +21,9 @@ namespace GyArte
         public SpriteSheet(string sheetName)
         {
             name = sheetName;
-            sheet = Raylib.LoadTexture($"{name}.png");
+            sheet = Raylib.LoadTexture($"Images/{name}.png");
 
-            string json = File.ReadAllText($"{name}.png.json");
+            string json = File.ReadAllText($"Images/{name}.png.json");
             AnimationMeta[] metaData = JsonSerializer.Deserialize<AnimationMeta[]>(json, jsonOptions) ?? throw new Exception($"{name}.png.json broke.");
             animations = new Animation[metaData.Length];
 
