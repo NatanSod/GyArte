@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Raylib_cs;
 using TalkBox;
-using GameMaster;
+using Hivemind;
 using System.Numerics;
+using System.Text.Json;
 
 namespace GyArte
 {
@@ -14,10 +15,7 @@ namespace GyArte
         static void Main(string[] args)
         {
             Render.Initialise(352, 270, 2);
-            Master gm = new Master();
-            gm.Create<Player>("Player");
-            // gm.Create<DialogueHandler>("DialogueHandler")()?.BeginDialogue("testDi");
-
+            Mastermind.Awaken();
             Raylib.SetTargetFPS(60);
 
             while (!Raylib.WindowShouldClose())
@@ -29,12 +27,12 @@ namespace GyArte
                 Raylib.DrawRectangle(Render.Width - 25, -25, 50, 50, Color.GREEN);
                 Raylib.DrawRectangle(-25, Render.Height - 25, 50, 50, Color.GREEN);
                 Raylib.DrawRectangle(Render.Width - 25, Render.Height - 25, 50, 50, Color.YELLOW);
-                Raylib.DrawText(Master.updates.ToString(), 50, 30, 10, Color.BLACK);
+                Raylib.DrawText(Mastermind.cycles.ToString(), 50, 30, 10, Color.BLACK);
                 Raylib.DrawFPS(50, 40);
                 Render.DoneDraw();
 
 
-                gm.Update();
+                Mastermind.Contemplate();
 
 
                 Render.EndDrawing();

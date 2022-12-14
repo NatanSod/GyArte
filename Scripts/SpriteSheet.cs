@@ -1,30 +1,22 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using TalkBox;
 using System.Text.Json;
 
 namespace GyArte
 {
     class SpriteSheet
     {
-        static JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
-        {
-            WriteIndented = true
-        };
-        string name;
+        public string Name { get; private set; }
         Texture2D sheet;
         Animation[] animations;
 
         public SpriteSheet(string sheetName)
         {
-            name = sheetName;
-            sheet = Raylib.LoadTexture($"Images/{name}.png");
+            Name = sheetName;
+            sheet = Raylib.LoadTexture($"Assets/Sprites/S_{Name}.png");
 
-            string json = File.ReadAllText($"Images/{name}.png.json");
-            AnimationMeta[] metaData = JsonSerializer.Deserialize<AnimationMeta[]>(json, jsonOptions) ?? throw new Exception($"{name}.png.json broke.");
+            string json = File.ReadAllText($"Assets/Sprites/S_{Name}.png.json");
+            MetaAnimation[] metaData = JsonSerializer.Deserialize<MetaAnimation[]>(json, Hivemind.Mastermind.jsonOptions) ?? throw new Exception($"{Name}.png.json broke.");
             animations = new Animation[metaData.Length];
 
             for (int i = 0; i < metaData.Length; i++)
@@ -42,13 +34,13 @@ namespace GyArte
                     return animation;
                 }
             }
-            throw new Exception($"That is not the name of an animation in the {name} sprite-sheet");
+            throw new Exception($"That is not the name of an animation in the {Name} sprite-sheet");
         }
 
         // Kill all the animations.
         public void Kill()
         {
-            foreach(Animation animation in animations)
+            foreach (Animation animation in animations)
             {
                 animation.Kill();
             }
@@ -70,7 +62,7 @@ namespace GyArte
 
         private RenderTexture2D[][] frames;
 
-        public Animation(AnimationMeta meta, Texture2D sheet)
+        public Animation(MetaAnimation meta, Texture2D sheet)
         {
             Name = meta.Name;
             Height = meta.Height;
@@ -115,7 +107,7 @@ namespace GyArte
             }
         }
     }
-    class AnimationMeta
+    class MetaAnimation
     {
         // In the sprite sheet, it assumes the sprites for animations are organised like this.
         //         frames ->

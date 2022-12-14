@@ -34,5 +34,25 @@ The reason there are three 1s and 3s each4 is because I want it to favour the sp
 3 - Player uses SpriteSheet
 Player can now use SpriteSheet, though it doesn't really use animations yet. I mentioned in the commit where I added the test image and it's metadata that it was probably broken. Surprisingly enough, it was not.
 
+
 4 - Messed up test sheet
 Scratch that previous one, I accidentally made the sprite for standing while looking left instead point to the right. How did I miss that?
+
+5 - Replace GameMaster with Hivemind 
+Create Mastermind, Slave, and Hive. The main difference between Hivemind and GameMaster is that Hivemind won't be future proofed. It will be what I need and nothing more, because I spend way too much time thinking about "Oh, what if I want to do ___?" and doing something I might never need.
+As a first step to say "I don't care about the future, now is what's important!" I changed each Vector3 to a Vector2.
+
+Mastermind: takes care of the update loop, organises the loaded sprite-sheets, and in general has an administrative role. It handles all inputs except for those that go to player because I don't feel like making that work right now. Maybe later.
+Slave: is the class for NPCs and props in the world, they have the same set of data as the player except they may also have a name, they have a bool for weather or not it's solid, and they may have an Interaction. 
+Hive: is the class for rooms, it handles all the Slaves in it and collisions. Though currently, the Hive is only able to handle slaves, and collisions don't work. 
+
+The player has been made able to interact with a Slave. How interaction is initiated depends on if the Slave is solid or not. A solid Slave requires that the user presses space while it's collision box overlaps with the interaction box created in front of the player (the direction it went in last). A non solid Slave requires that the player position falls within it's collision box for even a frame.
+
+There are a lot of classes with a name that start with "Meta". These are all for the purpose of constructing the class it's named after, usually by every get and set being public allowing a json object to be loaded into them.
+
+The "Image" directory had it's name changed to "Sprites" and was moved to the new "Assets directory ". All data used by the game that isn't defined through code is saved in there, such as the hives (rooms) and tile-sets.
+
+The files have a naming scheme to identify them at a glance. All sprit-sheets start with "S_", all hives start with "H_", and all tile-sets starts with "T_" (when I finally make one). When giving the name of what to load, these identifiers should not be included, as the loading function will include it automatically.
+Speaking of tile-sets, I made the TileSet class. It's currently very bare bones, but in the future it's meant to be a way to handle, you guessed it, tile-sets.
+
+I also made a change to the Trail class. Instead of using delegates to access the time and current position of the trailblazer (what I call the thing making the trail) I made the ITrailblazer interface to be implemented by any trailblazer.

@@ -51,14 +51,14 @@ namespace GyArte
             this.textSpeed = textSpeed;
         }
 
-        public bool done { get; private set; } = false;
+        public bool Done { get; private set; } = false;
 
         public void SetLine(TLine line)
         {
             currentLine = line;
             currentSpans = currentLine.GetLine();
             progress = 0;
-            done = false;
+            Done = false;
 
             dialogueLayout = MakeLayout(currentSpans, dialogueBox);
             if (line.s != null)
@@ -72,7 +72,7 @@ namespace GyArte
             if (currentSpans != null)
             {
                 progress = currentSpans.txt.Length;
-                done = true;
+                Done = true;
             }
         }
 
@@ -103,8 +103,8 @@ namespace GyArte
         {
             if (currentLine == null || currentSpans == null) return;
 
-            Raylib.DrawText(currentLine.t.ToString(), 50, 90, 20, Color.BLACK);
-            if (!done)
+            // Raylib.DrawText(currentLine.t.ToString(), 50, 90, 20, Color.BLACK);
+            if (!Done)
             {
                 if (progress < currentSpans.txt.Length)
                 {
@@ -112,7 +112,7 @@ namespace GyArte
                 }
                 else
                 {
-                    done = true;
+                    Done = true;
                 }
             }
             Raylib.DrawText(progress.ToString(), 50, 60, 20, Color.BLACK);
@@ -191,7 +191,7 @@ namespace GyArte
                                     currentColor);
                     i++;
                 }
-            Render.DoneDraw();
+                Render.DoneDraw();
             }
         }
 

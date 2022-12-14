@@ -3,30 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using GameMaster;
+using OldBadGameMaster;
 
 namespace GyArte
 {
     public struct PositionKey
     {
-        public Vector3 Pos { get; private set; } // The position.
+        public Vector2 Pos { get; private set; } // The position.
         public float Creation { get; private set; } // The time it was created. Birth would be more accurate, but it would also be weirder.
-        public PositionKey(Vector3 position, float creation)
+        public PositionKey(Vector2 position, float creation)
         {
             Pos = position;
             Creation = creation;
         }
     }
 
+    /// <summary>
+    /// The class that will make the trail should implement this interface.
+    /// </summary>
+    interface ITrailblazer
+    {
+        public Vector2 Position { get; } // The position.
+        public float Time { get; } // The current Time.
+
+        public PositionKey FrozenCopy()
+        {
+            return new PositionKey(Position, Time);
+        }
+    }
+
     class Trail : IEnumerable
     {
-        // Why did I make delegates to get references of Vector3s and floats?
-        // Because I felt it would look better.
-        public delegate Vector3 PositionRef();
-        public delegate float TimeRef();
-        private PositionRef positionRef;
-        private TimeRef timeRef;
-
+        ITrailblazer trailblazer;
         float _lifespan;
         public float Lifespan { get => _lifespan; }
 
@@ -46,7 +54,7 @@ namespace GyArte
         /// <summary>
         /// The current position of the thing making the trail.
         /// </summary>
-        public PositionKey Current { get => new PositionKey(positionRef(), timeRef()); }
+        public PositionKey Current { get => trailblazer.FrozenCopy(); }
         /// <summary>
         /// The oldest position that fits within the lifespan.
         /// </summary>
@@ -56,13 +64,13 @@ namespace GyArte
             {
                 PositionKey from = positionKeys[0];
                 float age = AgeOf(from);
-                
+
                 if (age < _lifespan) return from;
 
                 PositionKey to = this[1];
                 float progress = (age - _lifespan) / (to.Creation - from.Creation);
-                Vector3 pos = LinearInterpolate(from.Pos, to.Pos, progress);
-                return new PositionKey(pos, timeRef() - _lifespan);
+                Vector2 pos = LinearInterpolate(from.Pos, to.Pos, progress);
+                return new PositionKey(pos, trailblazer.Time - _lifespan);
             }
         }
         /// <summary>
@@ -78,19 +86,18 @@ namespace GyArte
             }
         }
 
-        public Trail(PositionRef positionReference, TimeRef timeReference, float maxAge)
+        public Trail(ITrailblazer livePositionKey, float maxAge)
         {
-            positionRef = positionReference;
-            timeRef = timeReference;
-            positionKeys.Add(new PositionKey(positionReference(), 0));
+            trailblazer = livePositionKey;
+            positionKeys.Add(trailblazer.FrozenCopy());
             _lifespan = maxAge;
         }
 
         // Save the current position and time, but not if the time since the last one is equal to or less than 0.
         public bool MakeKey()
         {
-            if (timeRef() <= positionKeys[positionKeys.Count - 1].Creation) return false; // Don't add one that is older than or equal in age to the youngest position.
-            positionKeys.Add(new PositionKey(positionRef(), timeRef()));
+            if (trailblazer.Time <= positionKeys[positionKeys.Count - 1].Creation) return false; // Don't add one that is older than or equal in age to the youngest position.
+            positionKeys.Add(trailblazer.FrozenCopy());
             Trim();
             return true;
         }
@@ -98,11 +105,11 @@ namespace GyArte
         // A list of the positions. It is currently assumed that the object moved in straight lines between each.
         private List<PositionKey> positionKeys = new List<PositionKey>();
 
-        public Vector3 GetPositionAt(float timeAgo)
+        public Vector2 GetPositionAt(float timeAgo)
         {
             Trim();
 
-            float timePoint = timeRef() - timeAgo;
+            float timePoint = trailblazer.Time - timeAgo;
 
             if (timeAgo >= _lifespan || timePoint <= positionKeys[0].Creation)
             {
@@ -129,19 +136,19 @@ namespace GyArte
                 }
                 i++;
             }
-            return positionRef();
+            return trailblazer.Position;
         }
 
-        public Vector3 GetDirectionAt(float timeAgo)
+        public Vector2 GetDirectionAt(float timeAgo)
         {
             Trim();
 
-            float timePoint = timeRef() - timeAgo;
+            float timePoint = trailblazer.Time - timeAgo;
 
             if (positionKeys.Count == 1 || timePoint >= positionKeys[positionKeys.Count - 1].Creation)
             {
                 // It is asking for the direction from the newest position to the current position.
-                Vector3 dir = Vector3.Normalize(positionRef() - positionKeys[positionKeys.Count - 1].Pos);
+                Vector2 dir = Vector2.Normalize(trailblazer.Position - positionKeys[positionKeys.Count - 1].Pos);
                 return dir;
             }
             else
@@ -154,9 +161,9 @@ namespace GyArte
                 }
 
 
-                Vector3 pos1 = positionKeys[i - 1].Pos;
-                Vector3 pos2 = positionKeys[i].Pos;
-                Vector3 dir = Vector3.Normalize(pos2 - pos1);
+                Vector2 pos1 = positionKeys[i - 1].Pos;
+                Vector2 pos2 = positionKeys[i].Pos;
+                Vector2 dir = Vector2.Normalize(pos2 - pos1);
                 return dir;
             }
         }
@@ -185,15 +192,15 @@ namespace GyArte
 
             // For it to remove a position, there must be more than 1 position, and the next position must be too old.
             // Because there must always be 1 position left and there must always be one position that is to old (if there is one that is too old).
-            while (positionKeys.Count > 1 && timeRef() - positionKeys[1].Creation > _lifespan)
+            while (positionKeys.Count > 1 && trailblazer.Time - positionKeys[1].Creation > _lifespan)
             {
                 positionKeys.RemoveAt(0);
             }
         }
 
-        public float AgeOf(PositionKey position) => timeRef() - position.Creation;
+        public float AgeOf(PositionKey position) => trailblazer.Time - position.Creation;
 
-        static Vector3 LinearInterpolate(Vector3 from, Vector3 to, float progress)
+        static Vector2 LinearInterpolate(Vector2 from, Vector2 to, float progress)
         {
             if (progress <= 0 || from == to)
             {
@@ -205,7 +212,7 @@ namespace GyArte
             }
             else
             {
-                Vector3 direction = to - from;
+                Vector2 direction = to - from;
                 return direction * progress + from;
             }
         }

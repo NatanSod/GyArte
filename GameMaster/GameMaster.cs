@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace GameMaster
+namespace OldBadGameMaster
 {
+    /* This is old and bad.
     class Master
     {
         public enum Step
@@ -156,5 +157,6 @@ namespace GameMaster
                 }
             }
         }
-    }
+    } 
+    */
 }

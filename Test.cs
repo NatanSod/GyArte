@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Raylib_cs;
 using TalkBox;
-using GameMaster;
+using OldBadGameMaster;
 
 namespace GyArte
 {

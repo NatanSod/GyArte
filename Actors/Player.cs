@@ -3,81 +3,151 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using GameMaster;
+using GyArte;
 
-namespace GyArte
+namespace Hivemind
 {
     // TODO: Make the player character unresponsive when dialogue is happening.
-    class Player : Actor
+    class Player : ITrailblazer
     {
-        enum State
+        public enum State
         {
             STAND,
             WALK,
+            TALK,
         }
 
-        float speed = 5;
-        Trail trail = new Trail(() => Vector3.Zero, (() => 0), 0);
+        State state = State.STAND;
 
-        protected override void Start()
-        {
+        public int Width { get; private set; } = 30;
+        public int Length { get; private set; } = 22;
+        int height = 36;
 
-        }
+        public Vector2 Position { get; private set; } = new Vector2(Render.Width / 2, Render.Height / 2);
+        public float Time { get; private set; } = 0;
+        Vector2 velocity = Vector2.Zero;
+        Vector2 facing = Vector2.UnitY;
+        float speed = 4;
+        Trail trail;
+        DialogueHandler dh { get => Mastermind.mouthpiece; }
+
         public Player()
         {
-            spriteSheet = new SpriteSheet("Test");
+            spriteSheet = Mastermind.LoadSheet("Test");
             stand = spriteSheet.GetAnimation("stand");
             walk = spriteSheet.GetAnimation("walk");
 
-            position = Vector3.Zero;
-            velocity = Vector3.Zero;
-            
-            trail = new Trail(() => position, (() => currentTime), 25 * 4 / speed);
+            trail = new Trail(this, 25 * 4 / speed);
         }
 
-        float currentTime = 0; // It starts at -1 so that the first time it's checked, right after it's been incremented, it's equal to 0.
-        Vector3 previousDirection = Vector3.Zero; // The direction the character moved in last frame.
         SpriteSheet spriteSheet;
         Animation stand;
         Animation walk;
 
+        public void Update()
+        {
+            while (true)
+            {
+                switch (state)
+                {
+                    case State.STAND:
+                        if (Interact()) continue;
+                        Walk();
+                        return;
+                    case State.WALK:
+                        if (Trigger()) continue;
+                        if (Interact()) continue;
+                        Walk();
+                        return;
+                    case State.TALK:
+                        Talk();
+                        return;
+                }
+                break;
+            }
+        }
 
-        protected override void Update()
+        void Walk()
         {
             // Figure out where to move to.
-            velocity = Vector3.Zero;
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_W)) { velocity -= Vector3.UnitY * speed; }
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_S)) { velocity += Vector3.UnitY * speed; }
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_A)) { velocity -= Vector3.UnitX * speed; }
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_D)) { velocity += Vector3.UnitX * speed; }
-            if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_W)) { velocity -= Vector2.UnitY; }
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_S)) { velocity += Vector2.UnitY; }
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_A)) { velocity -= Vector2.UnitX; }
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_D)) { velocity += Vector2.UnitX; }
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_R))
             {
-                position = new Vector3(Render.Width / 2, Render.Height / 2, 0);
+                Position = new Vector2(Render.Width / 2, Render.Height / 2);
             }
 
             if (velocity.Length() != 0)
             {
-                velocity = Vector3.Normalize(velocity);
-                velocity *= speed;
                 // If they changed directions, add it to the list of changed direction positions.
-                if (velocity != previousDirection)
+                if (velocity != facing)
                 {
                     trail.MakeKey();
                 }
 
-                currentTime++;
-                previousDirection = velocity;
+                facing = velocity;
+
+                velocity = Vector2.Normalize(velocity) * speed;
+
+                // Put the collision logic here somewhere.
+                Position += velocity;
+
+                Time++;
+                velocity = Vector2.Zero;
+                state = State.WALK;
+            }
+            else
+            {
+                state = State.STAND;
             }
         }
 
-        public override void Draw()
+        bool Interact()
+        {
+            // It interacted without me pressing space.
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+            {
+                State? s = Mastermind.Interact((int)(Position.X + facing.X * Width), (int)(Position.Y + facing.Y * Length));
+
+                if (s != null)
+                {
+                    state = s ?? state;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool Trigger()
+        {
+            State? s = Mastermind.Trigger((int)(Position.X), (int)(Position.Y));
+
+            if (s != null)
+            {
+                state = s ?? state;
+                return true;
+            }
+            return false;
+        }
+
+        void Talk()
+        {
+            if (dh.Done)
+            {
+                state = State.WALK;
+            }
+        }
+
+        public void Draw()
         {
             Render.DrawAt(Render.Layer.DEBUG, 0);
 
-            Vector3 previous = trail[0].Pos;
+            Vector2 previous = trail[0].Pos;
             for (int i = 1; i < trail.Count; i++)
             {
-                Vector3 pos = trail[i].Pos;
+                Vector2 pos = trail[i].Pos;
                 Raylib.DrawLine((int)previous.X, (int)previous.Y, (int)pos.X, (int)pos.Y, Color.LIME);
                 Raylib.DrawRectangle((int)previous.X - 2, (int)previous.Y - 2, 4, 4, Color.LIME);
                 previous = pos;
@@ -91,32 +161,50 @@ namespace GyArte
             {
                 // Draw each character in a different colour.
                 Color color;
+                Color dark;
                 switch (i)
                 {
                     case 0:
                         color = Color.RED;
+                        dark = Color.MAROON;
                         break;
                     case 1:
                         color = Color.GREEN;
+                        dark = Color.DARKGREEN;
                         break;
                     case 2:
                         color = Color.BLUE;
+                        dark = Color.DARKBLUE;
                         break;
                     default:
                         color = Color.YELLOW;
+                        dark = Color.ORANGE;
                         break;
                 }
-                Vector3 pos = trail.GetPositionAt(i * thirdLength);
+
+                Vector2 pos = trail.GetPositionAt(i * thirdLength);
                 Render.DrawAt(Render.Layer.MID_GROUND, (int)pos.Y);
-                Raylib.DrawRectangle((int)pos.X - 15, (int)pos.Y - 15, 30, 30, color);
+
+                Raylib.DrawRectangle((int)pos.X - (Width >> 1), (int)pos.Y - height + (Length >> 1), Width, height, color);
+
+                Raylib.DrawRectangle((int)pos.X - (Width >> 1), (int)pos.Y - height - (Length >> 1), Width, Length, dark);
+
                 int direction = DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength));
-                if (velocity.Length() != 0)
+
+                switch (state)
                 {
-                    walk.Draw(direction, 0, (int)pos.X, (int)pos.Y);
-                }
-                else 
-                {
-                    stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                    case State.WALK:
+                        walk.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        break;
+                    case State.STAND:
+                        stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        break;
+                    case State.TALK:
+                        direction = DirectionIndexFromVector(facing);
+                        stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        break;
+                    default:
+                        throw new Exception("Not ready to display that state yet.");
                 }
                 Render.DoneDraw();
             }
@@ -141,10 +229,9 @@ namespace GyArte
         //      2 - X - 0  (Right now, it prioritises the horizontal moving sprites. I might change that.)
         //        / | \
         //      2   1   0
-        // (These are 2d only.)
-        int DirectionIndexFromVector(Vector3 vector)
+        int DirectionIndexFromVector(Vector2 vector)
         {
-            vector = Vector3.Normalize(new Vector3(vector.X, vector.Y, 0));
+            vector = Vector2.Normalize(new Vector2(vector.X, vector.Y));
             float tolerance = -MathF.Sin(60);
             // int direction = 5;
 

@@ -3,16 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using GameMaster;
 using TalkBox;
+using GyArte;
 
-namespace GyArte
+namespace Hivemind
 {
-    class DialogueHandler : Actor
+    class DialogueHandler
     {
         // TODO: Make a function that ends dialogue in a more elegant and official fashion.
         // TODO: If I've gone insane, make it possible to select options with the mouse.
-
+        // TODO: Make it get the command manager from Mastermind.
         CommandManager cm = new CommandManager();
         public string dialogue = String.Empty;
         DialogueRunner? dr;
@@ -28,10 +28,10 @@ namespace GyArte
             Font font = Raylib.GetFontDefault();
             Scale textSize = new Scale(15, 10, 5);
             Vector2 border = new Vector2(2, 2);
-            int spaceWidth = 2; 
+            int spaceWidth = 2;
             int lineSpacing = 3;
             int layoutSpacing = 4;
-            
+
             int dLines = 4;
             Vector2 dArea = new Vector2(320, textSize.Medium * dLines + lineSpacing * (dLines - 1));
             Vector2 dMargin = new Vector2(14, 7);
@@ -39,8 +39,8 @@ namespace GyArte
             DebugTextBox dBox = new DebugTextBox(dOrigin, new(0, 0), dArea, dMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
             Vector2 nArea = new Vector2(0, textSize.Medium);
             Vector2 nMargin = new Vector2(5, 3);
-            Vector2 nOrigin = new Vector2(44 + nMargin.X + border.X, Render.Height - textSize.Medium - dArea.Y - (dMargin.Y + border.Y) * 2 - nMargin.Y); 
-            DebugTextBox nBox = new DebugTextBox(nOrigin, new(0, 0), nArea, nMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing); 
+            Vector2 nOrigin = new Vector2(44 + nMargin.X + border.X, Render.Height - textSize.Medium - dArea.Y - (dMargin.Y + border.Y) * 2 - nMargin.Y);
+            DebugTextBox nBox = new DebugTextBox(nOrigin, new(0, 0), nArea, nMargin, border, font, textSize, spaceWidth, lineSpacing, layoutSpacing);
             Vector2 oArea = new Vector2(0, 0);
             Vector2 oMargin = new Vector2(4, 3);
             Vector2 oOrigin = new Vector2(Render.Width - 11 - oMargin.X - border.X, dOrigin.Y - dMargin.Y - oMargin.Y - border.Y * 2 - 20);
@@ -48,19 +48,10 @@ namespace GyArte
             dd = new DialogueDisplay(dBox, nBox, oBox, new Scale(80, 30, 10));
         }
 
-        protected override void Start()
-        {
-            position = Vector3.Zero;
-            velocity = Vector3.Zero;
-        }
-
-        protected override void Update()
+        public void Update(bool next, int scroll)
         {
             waiting = cm.ExecuteAll();
-        }
 
-        public override void Draw()
-        {
             // There is no dialogue running. Therefore you should stop.
             if (dr == null) return;
 
@@ -69,13 +60,13 @@ namespace GyArte
                 // Currently waiting for a async command to finish.
                 // Making it impossible to continue to the next line (even if it's an auto line) while waiting is currently the safest option.
             }
-            else if (dd.done)
+            else if (dd.Done)
             {
                 // The line has been fully written to the screen.
                 if (choices.Count != 0)
                 {
                     // Pick an option.
-                    if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE) && choices[choice] >= 0)
+                    if (next && choices[choice] >= 0)
                     {
                         // Select the option and get the next line.
 
@@ -85,24 +76,16 @@ namespace GyArte
                         dd.EndOptions();
                         NextLine();
                     }
-                    else
+                    else if (scroll != 0)
                     {
-                        // Scroll through which options to select.
-                        if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) || Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
-                        {
-                            choice--;
-                        }
-                        if (Raylib.IsKeyPressed(KeyboardKey.KEY_S) || Raylib.IsKeyPressed(KeyboardKey.KEY_DOWN))
-                        {
-                            choice++;
-                        }
+                        choice += scroll;
                         choice = (choice + choices.Count) % choices.Count;
                     }
                 }
                 else
                 {
                     // Continue when told to or immediately, depending on the tags.
-                    if (auto || Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                    if (auto || next)
                     {
                         NextLine();
                     }
@@ -112,11 +95,20 @@ namespace GyArte
             {
                 // The line is being written to the screen and it isn't waiting for an async command.
                 // If next line input was given, then tell the displayer to finnish.
-                if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+                if (next)
                 {
                     dd.SkipLine();
                 }
             }
+        }
+
+        // If the dialogue is done.
+        public bool Done { get => dr == null; }
+
+        public void Draw()
+        {
+            // There is no dialogue running. Therefore you should stop.
+            if (dr == null) return;
 
             // Display the dialogue.
             if (choices.Count == 0)

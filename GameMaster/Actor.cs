@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace GameMaster
+namespace OldBadGameMaster
 {
+    /* This is old and bad.
     abstract class Actor
     {
         public enum Activity
@@ -56,5 +57,6 @@ namespace GameMaster
             OnDestroy = null;
             activity = Activity.Destroyed;
         }
-    }
+    } 
+    */
 }
