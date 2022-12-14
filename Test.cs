@@ -33,6 +33,7 @@ namespace GyArte
 
         public static void ConsoleDialogue(string dialogue = "testDi")
         {
+            /* I made a change that breaks this and I'm not fixing it, but I'm also not removing it.
             CommandManager cm = new CommandManager();
             DialogueRunner dr = new DialogueRunner(cm, dialogue);
             IEnumerator<TLineCollection?> LineGetter = dr.GetLineE();
@@ -108,6 +109,7 @@ namespace GyArte
                     dr.PickOption(answer);
                 }
             }
+            */
         }
     }
 }

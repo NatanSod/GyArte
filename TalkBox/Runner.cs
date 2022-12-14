@@ -10,7 +10,7 @@ namespace TalkBox
         // When getting all options for choices, "scout ahead" for options with equal level and stop when a line with lower level or equal level without an option is found.
         int line = 0;
         int level = 0;
-        bool awaiting = false;
+        bool Waiting { get => options.Count == 0 || cm.Waiting; }
         string nodeName;
         Node currentNode;
         Dictionary<string, Node> nodes;
@@ -181,7 +181,7 @@ namespace TalkBox
         {
             while (line < currentNode.lines.Length)
             {
-                while (awaiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
+                while (Waiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
 
                 Line currentLine = currentNode.lines[line];
 
@@ -203,9 +203,8 @@ namespace TalkBox
                     case Line.LineType.Option: // Go up a level and yield return a collection with the options to choose.
                         ScoutOptions();
                         TLineCollection oCollection = new TLineCollection(options);
-                        awaiting = true;
                         yield return oCollection;
-                        while (awaiting) yield return null; // Don't do anything unless an option has been selected.
+                        while (Waiting) yield return null; // Don't do anything unless an option has been selected.
                         hierarchy[level] = Mode.Option;
                         hierarchy.Add(Mode.Text);
                         level++;
@@ -242,11 +241,7 @@ namespace TalkBox
                         }
                         else
                         {
-                            if (cLine.Execute(cm) == true)
-                            {
-                                awaiting = true;
-                                while (awaiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
-                            }
+                            cLine.Execute(cm);
                             break;
                         }
                 }
@@ -256,14 +251,14 @@ namespace TalkBox
 
         public void PickOption(int option)
         {
-            if (!awaiting)
+            if (options.Count == 0)
             {
                 throw new InvalidOperationException("No answer is expected at the current time");
             }
             else if (option < options.Count && option >= 0)
             {
                 line = options[option].line;
-                awaiting = false;
+                options.Clear();
             }
             else
             {

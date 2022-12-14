@@ -46,14 +46,15 @@ namespace TalkBox
                 return new IfLine(ifType, statement, level, nr);
             }
 
-            // Command: "<<[Command]>>"
-            string commandPattern = @"^<<(\w*)\s*(.*?\s*)>>$";
-            m = Regex.Match(line, commandPattern);
+            // Command: "<<[Command] [Target?] [Arguments?]>>"
+            string commandPattern = @"^<<([^\s]*)\s*((?:(?!true|false)\w[^\s]*)?)\s*(.*?)\s*>>$";
+            m = Regex.Match(line, commandPattern, RegexOptions.IgnoreCase);
             if (m.Success)
             {
                 string command = m.Groups[1].Value;
-                string arguments = m.Groups[2].Value.Trim();
-                return new CLine(command, arguments, level, nr);
+                string? target = m.Groups[2].Value == String.Empty ? null : m.Groups[2].Value;
+                string arguments = m.Groups[3].Value.Trim();
+                return new CLine(command, target, arguments, level, nr);
             }
 
             // At this point, it's either text/dialogue or an option.
@@ -167,7 +168,7 @@ namespace TalkBox
             line = tLine.line;
             t = tLine.t;
             s = tLine.s;
-            
+
             lineTags = tLine.lineTags;
             statement = tLine.statement;
         }
@@ -344,24 +345,66 @@ namespace TalkBox
         }
     }
 
+
     // A line that contains a command to be executed 
     class CLine : Line
     {
-        public string c { get; private set; }
-        public string[] a { get; private set; }
-        public CLine(string command, string arguments, int indent, int nr)
+        // The pattern used to split arguments.
+        // It will keep strings and and equations in the same item in the resulting array.
+        static string ArgumentPattern
+        {
+            // This thing is so long and winding that I feel it needs a more in-depth explanation.
+            get =>
+                // First, a positive lookbehind, meaning the match within must succeed in order for it to split. 
+                // It starts either at the beginning of the string, or the previous split point.
+                // This means everything since the last split must match the pattern.
+                @"(?<=\G" +
+                    // A non capturing group. If it was capturing then it would also add what it captured to the array.
+                    "(?:" +
+                        // For it to succeed it must contain a PAIR of quotation marks.
+                        "[^\"]*\"[^\"]*\"" +
+                    // And it can succeed any number of times. (Including 0.)
+                    ")*" +
+                    // Then make sure there are no more quotation marks between here and the splitting point.
+                    "[^\"]*" +
+                // And this is the end of the lookbehind.
+                ")" +
+                // However, here is another. It makes sure that the symbol in front of the split point isn't a math symbol.
+                @"(?<=[^\+\-\*/])" +
+                // This is the split point. It needs to be at least one blank space, and each adjacent space will be lost to the aether.
+                @"\s+" +
+                // A positive look ahead, this one making sure the symbol right after isn't a math symbol either.
+                @"(?=[^\+\-\*/])";
+
+            // TLDR; if the pattern was just \s+ then it would split the below string value -
+            // first "second third" + fourth fifth
+            //      |       |      | |      |
+            //      1       2      3 4      5
+            // - in positions 1, 2, 3, 4, and 5.
+            // That would result in strings being split apart, as well as equations.
+            // This pattern would only split it at 1 and 5.
+            // The first lookbehind means it doesn't split at position 2.
+            // The second lookbehind means it doesn't split at position 4.
+            // The lookahead means it doesn't split at position 3.
+        }
+
+        public string c { get; private set; } // command
+        public string? t { get; private set; } // target
+        public string[] a { get; private set; } // arguments
+        public CLine(string command, string? target, string arguments, int indent, int nr)
         {
             type = LineType.Command;
             level = indent;
             line = nr;
             c = command;
+            t = target;
 
             if (command == string.Empty) throw new ArgumentException("There is no command in here");
 
-            a = Regex.Split(arguments, @"\s+");
+            a = Regex.Split(arguments, ArgumentPattern);
         }
 
-        public bool Execute(CommandManager commandManager)
+        public void Execute(CommandManager commandManager)
         {
             // The async commands need to check the mode of commandManager in case it's skipping or similar.
 
@@ -438,9 +481,15 @@ namespace TalkBox
             }
             else
             {
-                throw new ArgumentException($"{c} is not a command");
+                // It was none of the default commands. Give it to the CommandHandler and hope it knows what to do.
+                Variable[] arguments = new Variable[a.Length];
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    arguments[i] = Variables.Calculate(a[i]);
+                }
+
+                commandManager.Add(c, t, arguments);
             }
-            return false;
         }
     }
 }

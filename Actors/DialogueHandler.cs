@@ -13,7 +13,7 @@ namespace Hivemind
         // TODO: Make a function that ends dialogue in a more elegant and official fashion.
         // TODO: If I've gone insane, make it possible to select options with the mouse.
         // TODO: Make it get the command manager from Mastermind.
-        CommandManager cm = new CommandManager();
+        CommandManager cm = new Puppeteer();
         public string dialogue = String.Empty;
         DialogueRunner? dr;
         IEnumerator<TLineCollection?>? LineGetter;

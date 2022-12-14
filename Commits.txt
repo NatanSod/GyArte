@@ -56,3 +56,10 @@ The files have a naming scheme to identify them at a glance. All sprit-sheets st
 Speaking of tile-sets, I made the TileSet class. It's currently very bare bones, but in the future it's meant to be a way to handle, you guessed it, tile-sets.
 
 I also made a change to the Trail class. Instead of using delegates to access the time and current position of the trailblazer (what I call the thing making the trail) I made the ITrailblazer interface to be implemented by any trailblazer.
+
+
+6 - Updated CLine and related
+CLine has been changed to be able to accept a special target parameter (used by specific commands to identify what should be effected by it) and the argument split pattern has been changed to not separate string values and equations into separate items. The equation part does however slightly break negative values, so I will have to deal with that somehow. Could just make no commands that expect a negative value, or do 0 - [value]. 
+CommandManager has also been turned into an abstract class, because I refuse to make any code for TalkBox that only works in this project, and the command manager needs to handle commands specific for this project.
+I also changed a bit of how Runner interacts with these two to make them fit together better.
+The class that shall inherit CommandManager is Puppeteer. It currently has the bare minimum to avoid the IDE complaining or causing a compile error.

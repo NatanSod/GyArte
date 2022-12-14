@@ -18,7 +18,7 @@ namespace TalkBox
 
         private IEnumerator<bool?> command;
 
-        public Command (IEnumerator<bool?> enumerator)
+        public Command(IEnumerator<bool?> enumerator)
         {
             command = enumerator;
         }
@@ -45,47 +45,29 @@ namespace TalkBox
         }
     }
 
-    class CommandManager
+    abstract class CommandManager
     {
-        public enum Mode 
+        protected List<Command> commands = new List<Command>();
+
+        public bool Waiting
         {
-            None, 
-            Skip,
-            End,
-        }
-
-        public Mode currentMode { get; private set; } = Mode.None;
-
-        private List<Command> commands = new List<Command>();
-
-        public CommandManager ()
-        {
-
+            get
+            {
+                foreach (Command command in commands)
+                {
+                    if (command.wait == true) return true;
+                }
+                return false;
+            }
         }
 
         /// <summary>
         /// Add a command to the list of commands to execute over time.
         /// </summary>
-        /// <param name="enumerator"></param>
-        /// <returns>Should it wait?</returns>
-        public bool Add(IEnumerator<bool?> enumerator)
-        {
-            Command command = new Command (enumerator);
-            command.Continue();
-            if (command.done)
-            {
-                return false;
-            }
-            else 
-            {
-                commands.Add(command);
-                return command.wait;
-            }
-        }
+        abstract public void Add(string command, string? target, Variable[] arguments);
 
-        public bool ExecuteAll(Mode mode = Mode.None)
+        public bool ExecuteAll()
         {
-            currentMode = mode;
             bool wait = false;
             for (int i = 0; i < commands.Count; i++)
             {
@@ -97,7 +79,7 @@ namespace TalkBox
                     commands.Remove(current);
                     i--;
                 }
-                else 
+                else
                 {
                     // Change the value of wait to true if current command should be waited for
                     wait = current.wait ? current.wait : wait;
