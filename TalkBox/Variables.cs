@@ -46,7 +46,16 @@ namespace TalkBox
         public static Variable Calculate(string s)
         {
             if (s == string.Empty) throw new ArgumentException("How do you expect us to calculate nothing?");
-            string[] statement = Regex.Split(s, @"\b\s*(?=[\+\-\*/])|(?<=[\+\-\*/])\s*(?=[\d\$])");
+            string[] statement = Regex.Split(s, @"(?<=\G" +
+                                                    "(?:" +
+                                                        "(?:\\\"|[^\"])*" +
+                                                        "\"" +
+                                                        "(?:\\\"|[^\"])*" +
+                                                        "[^\\\\]\"" +
+                                                    ")*" +
+                                                    "(?:\\\"|[^\"])*" +
+                                                ")" +
+                                                @"\s*([\+\-\*/])\s*");
             List<Variable> variables = new List<Variable>();
             List<char> operators = new List<char>();
             Variable.vType? statementType = null;
@@ -70,7 +79,7 @@ namespace TalkBox
                 if (item[0] == '$')
                 {
                     Variable v = Variables.Get(item);
-                    type = v.t;
+                    type = v.Type;
                     variables.Add(v);
                 }
                 else
@@ -225,7 +234,7 @@ namespace TalkBox
                     string comparator = ma.Groups[2].Value;
                     Variable right = Variables.Calculate(ma.Groups[3].Value);
 
-                    if (left.t != right.t)
+                    if (left.Type != right.Type)
                     {
                         throw new InvalidOperationException("Can't compare values of different types");
                     }
@@ -233,20 +242,20 @@ namespace TalkBox
                     // Make sure not happens first.
                     if (comparator == "!=")
                     {
-                        result = left.v != right.v;
+                        result = left.Value != right.Value;
                     }
                     // So that if it wasn't != then if it contains a '=' it's either ==, <=, or >=. 
                     // In all those cases, if the values are equal it should become true.
-                    else if (comparator.Contains('=') && left.v == right.v)
+                    else if (comparator.Contains('=') && left.Value == right.Value)
                     {
                         result = true;
                     }
                     // Only check < and > if numbers are being compared
-                    else if (left.t == Variable.vType.Number && comparator.Contains('<'))
+                    else if (left.Type == Variable.vType.Number && comparator.Contains('<'))
                     {
                         result = left.GetValue<float>() < right.GetValue<float>();
                     }
-                    else if (left.t == Variable.vType.Number && comparator.Contains('>'))
+                    else if (left.Type == Variable.vType.Number && comparator.Contains('>'))
                     {
                         result = left.GetValue<float>() > right.GetValue<float>();
                     }
@@ -287,12 +296,13 @@ namespace TalkBox
             Bool,
             String,
         }
-        public vType t { get; private set; }
-        public string v { get; private set; }
+        public vType Type { get; private set; }
+        string v;
+        public string Value { get => Type == vType.String ? $"\"{v}\"" : v; }
 
         public Variable(string value, vType type)
         {
-            t = type;
+            Type = type;
             v = "null";
             if (IsValidValue(value))
                 v = value;
@@ -300,7 +310,7 @@ namespace TalkBox
 
         public Variable(Variable value)
         {
-            t = value.t;
+            Type = value.Type;
             v = value.v;
         }
 
@@ -314,7 +324,7 @@ namespace TalkBox
         }
         public void Set(Variable value)
         {
-            if (t == value.t)
+            if (Type == value.Type)
             {
                 v = value.v;
             }
@@ -322,7 +332,7 @@ namespace TalkBox
 
         public bool IsValidValue(string value)
         {
-            switch (t)
+            switch (Type)
             {
                 case vType.Bool:
                     {
@@ -336,10 +346,9 @@ namespace TalkBox
                         if (!float.TryParse(value, out ignoreMe)) throw new ArgumentException("Ay, that is not a number");
                     }
                     break;
-
-                case vType.String:
-                    if (value[0] != '"' || !value.EndsWith('"')) throw new ArgumentException("Ay, that is not a string");
-                    break;
+                // case vType.String:
+                //     if (value[0] != '"' || !value.EndsWith('"')) throw new ArgumentException("Ay, that is not a string");
+                //     break;
             }
             return true;
         }
@@ -347,13 +356,9 @@ namespace TalkBox
         public TBoolFloatString GetValue<TBoolFloatString>()
         {
             if (typeof(TBoolFloatString) == typeof(string)
-                || (t == vType.Number && typeof(TBoolFloatString) == typeof(float))
-                || (t == vType.Bool && typeof(TBoolFloatString) == typeof(bool)))
+                || (Type == vType.Number && typeof(TBoolFloatString) == typeof(float))
+                || (Type == vType.Bool && typeof(TBoolFloatString) == typeof(bool)))
             {
-                if (t == vType.String)
-                {
-                    return (TBoolFloatString)Convert.ChangeType(v.Substring(1, v.Length - 2), typeof(TBoolFloatString));
-                }
                 return (TBoolFloatString)Convert.ChangeType(v, typeof(TBoolFloatString));
             }
             throw new InvalidOperationException("You tried to get the wrong type, idiot");

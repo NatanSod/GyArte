@@ -134,9 +134,9 @@ namespace Hivemind
 
         void Talk()
         {
-            if (dh.Done)
+            if (!dh.Running)
             {
-                state = State.WALK;
+                state = State.STAND;
             }
         }
 

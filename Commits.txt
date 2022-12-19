@@ -63,3 +63,10 @@ CLine has been changed to be able to accept a special target parameter (used by 
 CommandManager has also been turned into an abstract class, because I refuse to make any code for TalkBox that only works in this project, and the command manager needs to handle commands specific for this project.
 I also changed a bit of how Runner interacts with these two to make them fit together better.
 The class that shall inherit CommandManager is Puppeteer. It currently has the bare minimum to avoid the IDE complaining or causing a compile error.
+
+
+7 - Stealing
+Decided to steal a bunch of code from Yarn Spinner. It can be found at, https://github.com/YarnSpinnerTool, and most code is from these two directories: https://github.com/YarnSpinnerTool/YarnSpinner and https://github.com/YarnSpinnerTool/YarnSpinner-Unity. It's all in Command.cs. 
+However, I did not finnish integrating the stolen code because it is too much and I don't need it at the moment. I will therefore do that when I have time and need to.
+I did however change how line information is sent from DialogueRunner to DialogueHandler. Before, DH asked DR for the next line and received it if available. Now, DR is asked to continue and then it tells DH what to do.
+I also probably did a whole lot of other things, because I got very sidetracked throughout.

@@ -5,6 +5,7 @@ using System.Numerics;
 using GyArte;
 using System.Text.Json;
 using Raylib_cs;
+using TalkBox;
 
 namespace Hivemind
 {
@@ -16,6 +17,7 @@ namespace Hivemind
         static private List<SpriteSheet> spriteSheets = new List<SpriteSheet>();
 
         static public DialogueHandler mouthpiece { get; private set; } = new DialogueHandler();
+        static public DialogueRunner lore { get; private set; } = new DialogueRunner(mouthpiece, "testDi");
         static public Player victim { get; private set; } = new Player();
         static public Hive currentHive { get; private set; } = new Hive("Test");
         static public Slave? subject { get; private set; }
@@ -48,7 +50,7 @@ namespace Hivemind
         /// </summary>
         static public void Contemplate()
         {
-            if (!mouthpiece.Done)
+            if (mouthpiece.Running)
             {
                 Converse();
             }

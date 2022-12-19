@@ -4,9 +4,9 @@ using GyArte;
 namespace Hivemind
 {
     // The NPC and prop class.
-    class Slave
+    class Slave : TalkBox.ISearchable
     {
-        public string? Name { get; private set; }
+        public string Name { get; private set; }
         public Vector2 Position { get; private set; }
         public int Facing { get; private set; }
 
@@ -74,7 +74,7 @@ namespace Hivemind
 
     class MetaSlave
     {
-        public string? Name { get; set; }
+        public string Name { get; set; } = "";
         public int X { get; set; }
         public int Y { get; set; }
         public int Facing { get; set; }

@@ -8,23 +8,90 @@ using GyArte;
 
 namespace Hivemind
 {
-    class DialogueHandler
+    class DialogueHandler : ILineOutput
     {
         // TODO: Make a function that ends dialogue in a more elegant and official fashion.
         // TODO: If I've gone insane, make it possible to select options with the mouse.
         // TODO: Make it get the command manager from Mastermind.
-        CommandManager cm = new Puppeteer();
-        public string dialogue = String.Empty;
-        DialogueRunner? dr;
-        IEnumerator<TLineCollection?>? LineGetter;
+        CommandManager cm = new CommandManager();
+        DialogueRunner dr;
         DialogueDisplay dd;
-        bool waiting = false;
         bool auto = false;
         List<int> choices = new List<int>();
         int choice = 0;
+        public bool Running { get; private set; }
+
+        void ILineOutput.Start()
+        {
+            Running = true;
+            NextLine();
+        }
+
+        void ILineOutput.DisplayLine(TLine line)
+        {
+            if (choices.Count != 0)
+            {
+                choice = 0;
+                choices.Clear();
+                dd.EndOptions();
+            }
+
+            dd.SetLine(line);
+            auto = line.lineTags.GetTag(Tag.LAST);
+        }
+
+        void ILineOutput.DisplayOptions(TLine[] options)
+        {
+            if (choices.Count != 0)
+            {
+                choice = 0;
+                choices.Clear();
+                dd.EndOptions();
+            }
+
+            int i = 0;
+            foreach (TLine line in options)
+            {
+                if (line.statement == String.Empty || Variables.Evaluate(line.statement))
+                {
+                    // This line is to be displayed.
+                    dd.AddOption(line, true);
+                    choices.Add(i);
+                }
+                else if (line.lineTags.GetTag(Tag.LOCK))
+                {
+                    // This line is to be displayed, but not selectable.
+                    dd.AddOption(line, false);
+                    choices.Add(-i); // In order to still be able to hover over them but not select them, I did this.
+                }
+                // Else, this line is not to be displayed.
+                i++;
+            }
+
+            auto = false;
+
+            if (choices.Count == 0)
+            {
+                // There is no option that can be selected, end the dialogue. Maybe throw an exception.
+                Running = false;
+                return;
+            }
+        }
+
+        void ILineOutput.OptionSelected()
+        {
+            NextLine();
+        }
+
+        void ILineOutput.End()
+        {
+            Running = false;
+            // Maybe I should tell the player to start moving here.
+        }
 
         public DialogueHandler()
         {
+            dr = Mastermind.lore;
             Font font = Raylib.GetFontDefault();
             Scale textSize = new Scale(15, 10, 5);
             Vector2 border = new Vector2(2, 2);
@@ -50,17 +117,10 @@ namespace Hivemind
 
         public void Update(bool next, int scroll)
         {
-            waiting = cm.ExecuteAll();
-
             // There is no dialogue running. Therefore you should stop.
-            if (dr == null) return;
+            if (!Running) return;
 
-            if (waiting)
-            {
-                // Currently waiting for a async command to finish.
-                // Making it impossible to continue to the next line (even if it's an auto line) while waiting is currently the safest option.
-            }
-            else if (dd.Done)
+            if (dd.Done)
             {
                 // The line has been fully written to the screen.
                 if (choices.Count != 0)
@@ -68,13 +128,9 @@ namespace Hivemind
                     // Pick an option.
                     if (next && choices[choice] >= 0)
                     {
-                        // Select the option and get the next line.
+                        // Select the option.
 
                         dr.PickOption(choices[choice]);
-                        choice = 0;
-                        choices.Clear();
-                        dd.EndOptions();
-                        NextLine();
                     }
                     else if (scroll != 0)
                     {
@@ -102,9 +158,6 @@ namespace Hivemind
             }
         }
 
-        // If the dialogue is done.
-        public bool Done { get => dr == null; }
-
         public void Draw()
         {
             // There is no dialogue running. Therefore you should stop.
@@ -124,76 +177,14 @@ namespace Hivemind
         public void BeginDialogue(string dialogueName)
         {
             // Would prefer if two dialogues wouldn't start at the same time.
-            if (dr == null)
+            if (!Running)
             {
                 // Get the dialogue and display the first line.
-                dr = new DialogueRunner(cm, dialogueName);
-                LineGetter = dr.GetLineE();
-                NextLine();
+                dr = new DialogueRunner(this, dialogueName);
+                dr.Start();
             }
         }
 
-        private void NextLine()
-        {
-            // Get the next line from LineGetter and give it to display line
-            if (LineGetter?.MoveNext() == true)
-            {
-                // The dialogue continues. Display it.
-                if (LineGetter.Current != null)
-                {
-                    TLineCollection currentLine = LineGetter.Current;
-                    if (currentLine.lineType == Line.LineType.Dialogue)
-                    {
-                        // Dialogue line.
-                        dd.SetLine(currentLine.line ?? throw new Exception("This should never happen, but it makes the IDE happy."));
-                        auto = currentLine.line.lineTags.GetTag(Tag.LAST);
-                    }
-                    else
-                    {
-                        // Option line.
-                        int i = 0;
-                        foreach (TLine line in ((TLine[])currentLine.lines))
-                        {
-                            if (line.statement == String.Empty || Variables.Evaluate(line.statement))
-                            {
-                                // This line is to be displayed.
-                                dd.AddOption(line, true);
-                                choices.Add(i);
-                            }
-                            else if (line.lineTags.GetTag(Tag.LOCK))
-                            {
-                                // This line is to be displayed, but not selectable.
-                                dd.AddOption(line, false);
-                                choices.Add(-i); // In order to still be able to hover over them but not select them, I did this.
-                            }
-                            // Else, this line is not to be displayed.
-                            i++;
-                        }
-
-                        if (choices.Count == 0)
-                        {
-                            // There is no option that can be selected, end the dialogue.
-                            LineGetter = null;
-                            dr = null;
-                            return;
-                        }
-
-                        auto = false;
-                        choice = 0;
-                    }
-                }
-                else
-                {
-                    // I have made spaghetti code. I need to clean up the async function stuff.
-                    // Until then, if this happens, no action should be taken.
-                }
-            }
-            else
-            {
-                // The dialogue has ended (It might also not exist, but that should never happen).
-                LineGetter = null;
-                dr = null;
-            }
-        }
+        private void NextLine() => dr.NextLine();
     }
 }

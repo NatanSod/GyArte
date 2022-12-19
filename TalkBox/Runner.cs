@@ -10,11 +10,14 @@ namespace TalkBox
         // When getting all options for choices, "scout ahead" for options with equal level and stop when a line with lower level or equal level without an option is found.
         int line = 0;
         int level = 0;
-        bool Waiting { get => options.Count == 0 || cm.Waiting; }
+        bool waitingOptions = false;
+        bool waitingCommand = false;
         string nodeName;
         Node currentNode;
         Dictionary<string, Node> nodes;
         CommandManager cm;
+        ILineOutput lineOutput;
+        IEnumerator lineGetter;
 
         List<TLine> options = new List<TLine>();
 
@@ -28,9 +31,10 @@ namespace TalkBox
 
         private List<Mode> hierarchy = new List<Mode>();
 
-        public DialogueRunner(CommandManager commandManager, string dialogueName, string node = "Start")
+        public DialogueRunner(ILineOutput output, string dialogueName, string node = "Start")
         {
-            cm = commandManager;
+            cm = new CommandManager();
+            lineOutput = output;
             nodes = Parser.Make(dialogueName);
             nodeName = node;
             currentNode = nodes[nodeName];
@@ -39,6 +43,12 @@ namespace TalkBox
                 throw new ArgumentException($"{node} could not be found in {dialogueName}");
             }
             hierarchy.Add(Mode.Text);
+            lineGetter = GetLineE();
+        }
+
+        public void Start()
+        {
+            lineOutput.Start();
         }
 
         private void GoDown()
@@ -155,8 +165,6 @@ namespace TalkBox
 
         private void ScoutOptions()
         {
-            options.Clear();
-
             int scoutLine = line;
 
             Line currentLine = currentNode.lines[scoutLine];
@@ -177,12 +185,14 @@ namespace TalkBox
             }
         }
 
-        public IEnumerator<TLineCollection?> GetLineE()
+        public void NextLine() => lineGetter.MoveNext();
+
+        public void FinnishCommand() { waitingCommand = false; lineGetter.MoveNext(); }
+
+        private IEnumerator GetLineE()
         {
             while (line < currentNode.lines.Length)
             {
-                while (Waiting) yield return null; // Don't do anything while waiting for an async command to finnish first.
-
                 Line currentLine = currentNode.lines[line];
 
                 if (currentLine.level < level)
@@ -195,16 +205,16 @@ namespace TalkBox
                 switch (currentLine.type)
                 {
                     case Line.LineType.Dialogue: // Simply yield return a collection with the line to display.
-                        TLine dLine = currentLine as TLine ?? throw new Exception();
-                        TLineCollection tCollection = new TLineCollection(dLine);
-                        yield return tCollection;
+                        TLine dLine = (TLine)currentLine;
+                        lineOutput.DisplayLine(dLine);
+                        yield return null;
                         break;
 
                     case Line.LineType.Option: // Go up a level and yield return a collection with the options to choose.
                         ScoutOptions();
-                        TLineCollection oCollection = new TLineCollection(options);
-                        yield return oCollection;
-                        while (Waiting) yield return null; // Don't do anything unless an option has been selected.
+                        waitingOptions = true;
+                        lineOutput.DisplayOptions(options.ToArray());
+                        while (waitingOptions) yield return null; // Don't do anything unless an option has been selected.
                         hierarchy[level] = Mode.Option;
                         hierarchy.Add(Mode.Text);
                         level++;
@@ -242,16 +252,19 @@ namespace TalkBox
                         else
                         {
                             cLine.Execute(cm);
+                            waitingCommand = true;
+                            while (waitingCommand) yield return null; // Don't do anything while waiting for an async command to finnish first.
                             break;
                         }
                 }
                 line++;
             }
+            lineOutput.End();
         }
 
         public void PickOption(int option)
         {
-            if (options.Count == 0)
+            if (!waitingOptions)
             {
                 throw new InvalidOperationException("No answer is expected at the current time");
             }
@@ -259,6 +272,8 @@ namespace TalkBox
             {
                 line = options[option].line;
                 options.Clear();
+                waitingOptions = false;
+                lineOutput.OptionSelected();
             }
             else
             {

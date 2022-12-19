@@ -46,15 +46,14 @@ namespace TalkBox
                 return new IfLine(ifType, statement, level, nr);
             }
 
-            // Command: "<<[Command] [Target?] [Arguments?]>>"
-            string commandPattern = @"^<<([^\s]*)\s*((?:(?!true|false)\w[^\s]*)?)\s*(.*?)\s*>>$";
+            // Command: "<<[Command] [Arguments?]>>"
+            string commandPattern = @"^<<([^\s]*)\s*(.*?)>>$";
             m = Regex.Match(line, commandPattern, RegexOptions.IgnoreCase);
             if (m.Success)
             {
                 string command = m.Groups[1].Value;
-                string? target = m.Groups[2].Value == String.Empty ? null : m.Groups[2].Value;
-                string arguments = m.Groups[3].Value.Trim();
-                return new CLine(command, target, arguments, level, nr);
+                string arguments = m.Groups[2].Value.Trim();
+                return new CLine(command, arguments, level, nr);
             }
 
             // At this point, it's either text/dialogue or an option.
@@ -361,12 +360,12 @@ namespace TalkBox
                 @"(?<=\G" +
                     // A non capturing group. If it was capturing then it would also add what it captured to the array.
                     "(?:" +
-                        // For it to succeed it must contain a PAIR of quotation marks.
-                        "[^\"]*\"[^\"]*\"" +
+                        // For it to succeed it must contain a PAIR of non escaped quotation marks.
+                        "(?:\\\"|[^\"])*\"(?:\\\"|[^\"])*[^\\\\]\"" +
                     // And it can succeed any number of times. (Including 0.)
                     ")*" +
                     // Then make sure there are no more quotation marks between here and the splitting point.
-                    "[^\"]*" +
+                    "(?:\\\"|[^\"])*" +
                 // And this is the end of the lookbehind.
                 ")" +
                 // However, here is another. It makes sure that the symbol in front of the split point isn't a math symbol.
@@ -391,13 +390,12 @@ namespace TalkBox
         public string c { get; private set; } // command
         public string? t { get; private set; } // target
         public string[] a { get; private set; } // arguments
-        public CLine(string command, string? target, string arguments, int indent, int nr)
+        public CLine(string command, string arguments, int indent, int nr)
         {
             type = LineType.Command;
             level = indent;
             line = nr;
             c = command;
-            t = target;
 
             if (command == string.Empty) throw new ArgumentException("There is no command in here");
 
@@ -440,7 +438,7 @@ namespace TalkBox
                 else
                 {
                     value = Variables.Calculate(evaluate);
-                    if (type != value.t)
+                    if (type != value.Type)
                     {
                         throw new ArgumentException("The type assigned to this variable doesn't match the value it's defined as");
                     }
@@ -462,7 +460,7 @@ namespace TalkBox
 
                 // And the value is everything else except the assignment thingy.
                 Variable value;
-                if (Variables.Get(name).t == Variable.vType.Bool)
+                if (Variables.Get(name).Type == Variable.vType.Bool)
                 {
                     value = new Variable(Variables.Evaluate(evaluate).ToString(), Variable.vType.Bool);
                 }
@@ -473,7 +471,7 @@ namespace TalkBox
                     // If it's a wacky assignment, like +=
                     if (assign[0] != '=')
                     {
-                        evaluate = $"{name} {assign[0]} {value.v}";
+                        evaluate = $"{name} {assign[0]} {value.Value}";
                         value = Variables.Calculate(evaluate);
                     }
                 }
@@ -481,6 +479,7 @@ namespace TalkBox
             }
             else
             {
+                // I have decided to make this work at a later date.
                 // It was none of the default commands. Give it to the CommandHandler and hope it knows what to do.
                 Variable[] arguments = new Variable[a.Length];
                 for (int i = 0; i < arguments.Length; i++)
@@ -488,7 +487,7 @@ namespace TalkBox
                     arguments[i] = Variables.Calculate(a[i]);
                 }
 
-                commandManager.Add(c, t, arguments);
+                // commandManager.Add(c, t, arguments);
             }
         }
     }
