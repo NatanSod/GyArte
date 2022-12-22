@@ -14,7 +14,7 @@ namespace GyArte
     {
         static void Main(string[] args)
         {
-            Render.Initialise(352, 270, 2);
+            Render.Initialise(352, 270, 2, false);
             Mastermind.Awaken();
             Raylib.SetTargetFPS(60);
 

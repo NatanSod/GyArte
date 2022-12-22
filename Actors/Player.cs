@@ -148,11 +148,12 @@ namespace Hivemind
             for (int i = 1; i < trail.Count; i++)
             {
                 Vector2 pos = trail[i].Pos;
-                Raylib.DrawLine((int)previous.X, (int)previous.Y, (int)pos.X, (int)pos.Y, Color.LIME);
-                Raylib.DrawRectangle((int)previous.X - 2, (int)previous.Y - 2, 4, 4, Color.LIME);
+                Raylib.DrawLine((int)(previous.X - Mastermind.Eyes.X), (int)(previous.Y - Mastermind.Eyes.Y), 
+                                (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y), Color.LIME);
+                Raylib.DrawRectangle((int)(previous.X -Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
                 previous = pos;
             }
-            Raylib.DrawRectangle((int)previous.X - 2, (int)previous.Y - 2, 4, 4, Color.LIME);
+            Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
             Render.DoneDraw();
 
             float thirdLength = trail.Lifespan / 3;
@@ -185,23 +186,23 @@ namespace Hivemind
                 Vector2 pos = trail.GetPositionAt(i * thirdLength);
                 Render.DrawAt(Render.Layer.MID_GROUND, (int)pos.Y);
 
-                Raylib.DrawRectangle((int)pos.X - (Width >> 1), (int)pos.Y - height + (Length >> 1), Width, height, color);
+                Raylib.DrawRectangle((int)(pos.X - Mastermind.Eyes.X) - (Width >> 1), (int)(pos.Y - Mastermind.Eyes.Y) - height + (Length >> 1), Width, height, color);
 
-                Raylib.DrawRectangle((int)pos.X - (Width >> 1), (int)pos.Y - height - (Length >> 1), Width, Length, dark);
+                Raylib.DrawRectangle((int)(pos.X - Mastermind.Eyes.X) - (Width >> 1), (int)(pos.Y - Mastermind.Eyes.Y) - height - (Length >> 1), Width, Length, dark);
 
                 int direction = DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength));
 
                 switch (state)
                 {
                     case State.WALK:
-                        walk.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        walk.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
                         break;
                     case State.STAND:
-                        stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
                         break;
                     case State.TALK:
                         direction = DirectionIndexFromVector(facing);
-                        stand.Draw(direction, 0, (int)pos.X, (int)pos.Y);
+                        stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
                         break;
                     default:
                         throw new Exception("Not ready to display that state yet.");

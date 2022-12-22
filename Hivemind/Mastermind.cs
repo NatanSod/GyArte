@@ -16,12 +16,51 @@ namespace Hivemind
         // I should initialize them in Awaken, but then the IDE complains about possible null reference.
         static private List<SpriteSheet> spriteSheets = new List<SpriteSheet>();
 
-        static public DialogueHandler mouthpiece { get; private set; } = new DialogueHandler();
-        static public DialogueRunner lore { get; private set; } = new DialogueRunner(mouthpiece, "testDi");
-        static public Player victim { get; private set; } = new Player();
-        static public Hive currentHive { get; private set; } = new Hive("Test");
+        static public DialogueHandler mouthpiece { get; private set; }
+        static public DialogueRunner lore { get; private set; }
+        static public Player victim { get; private set; }
+        static public Hive currentHive { get; private set; }
         static public Slave? subject { get; private set; }
+        static public Vector2 Eyes { get; private set; }
 
+        static Mastermind()
+        {
+            mouthpiece = new DialogueHandler();
+            lore = new DialogueRunner(mouthpiece, "testDi");
+            victim = new Player();
+            currentHive = new Hive("Test");
+            
+            float x = victim.Position.X - Render.Width;
+            float y = victim.Position.Y - Render.Height;
+
+            UpdateEyes();
+        }
+
+        static void UpdateEyes()
+        {
+            float x = victim.Position.X - (Render.Width >> 1);
+            float y = victim.Position.Y - (Render.Height >> 1);
+
+            if (x <= 0)
+            {
+                x = 0;
+            }
+            else if (x + Render.Width > currentHive.ActualWidth)
+            {
+                x = currentHive.ActualWidth - Render.Width;
+            }
+
+            if (y <= 0)
+            {
+                y = 0;
+            }
+            else if (y + Render.Height > currentHive.ActualLength)
+            {
+                y = currentHive.ActualLength - Render.Height;
+            }
+
+            Eyes = new Vector2(x, y);
+        }
 
         public static JsonSerializerOptions jsonOptions
         {
@@ -56,6 +95,7 @@ namespace Hivemind
             }
 
             victim.Update();
+            UpdateEyes();
             victim.Draw();
             currentHive.Update();
             cycles++;

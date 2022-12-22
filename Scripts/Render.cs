@@ -42,6 +42,7 @@ namespace GyArte
         static int LeftMargin { get => (WindowWidth - DisplayWidth) >> 1; }
         static int TopMargin { get => (WindowHeight - DisplayHeight) >> 1; }
 
+        static bool debug = false;
 
         private static bool switchFullscreen;
 
@@ -51,8 +52,9 @@ namespace GyArte
         /// <param name="renderWidth">The amount of full pixels that can be displayed on one horizontal line.</param>
         /// <param name="renderHeight">The amount of full pixels that can be displayed on one vertical line.</param>
         /// <param name="startingPixelSize">The amount of pixels one pixel will be displayed as.</param>
-        public static void Initialise(int renderWidth, int renderHeight, int startingPixelSize)
+        public static void Initialise(int renderWidth, int renderHeight, int startingPixelSize, bool displayDebug)
         {
+            debug = displayDebug;
             if (Raylib.IsWindowReady()) return; // Don't accidentally make two or something stupid like that. I can't be bothered to put this anywhere else.
 
             Raylib.SetTraceLogLevel(TraceLogLevel.LOG_NONE); // Don't log all the dumb stuff, it's annoying.
@@ -128,10 +130,13 @@ namespace GyArte
             isDrawing = false;
             // Make a variable that decides if it's able to draw.
 
-            Raylib.ClearBackground(Color.WHITE); // If something wasn't drawn properly, dispose of it.
+            Raylib.ClearBackground(Color.BLACK); // If something wasn't drawn properly, dispose of it.
+            Raylib.DrawRectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight, Color.WHITE);
+
 
             foreach (Drawing drawing in drawings)
             {
+                if (drawing.Layer == Layer.DEBUG && !debug) continue;
                 Raylib.DrawTexturePro(drawing.Texture, new Rectangle(0, 0, Width, -Height), new Rectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight), Vector2.Zero, 0, Color.WHITE);
             }
             Raylib.EndDrawing();

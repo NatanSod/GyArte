@@ -14,10 +14,14 @@ namespace Hivemind
         public string Name { get; private set; }
         public int Width { get; private set; }
         public int Length { get; private set; }
+        public int ActualWidth { get; private set; }
+        public int ActualLength { get; private set; }
 
         public Tile[] Layout { get; private set; }
         public Wall[] Walls { get; private set; }
         public Slave[] Slaves { get; private set; }
+
+        RenderTexture2D background;
 
         public Hive(string name)
         {
@@ -31,11 +35,20 @@ namespace Hivemind
 
             TileSet tileSet = new TileSet(meta.TileSet);
 
+            ActualWidth = Width * tileSet.TileWidth;
+            ActualLength = Length * tileSet.TileHeight;
+
             Layout = new Tile[meta.Layout.Length];
             for (int i = 0; i < Layout.Length; i++)
             {
-                Layout[i] = tileSet[i];
+                Layout[i] = tileSet.GetTile(meta.Layout[i]);
             }
+            background = Raylib.LoadRenderTexture(Width * tileSet.TileWidth, Length * tileSet.TileHeight);
+            Raylib.BeginTextureMode(background);
+            tileSet.Print(meta.Layout, Width, Length);
+            Raylib.EndTextureMode();
+            
+
             // Then figure out the background and foreground from that.
 
             Walls = new Wall[meta.Walls.Length];
@@ -68,6 +81,15 @@ namespace Hivemind
         public void Update()
         {
             // Remember to draw the background, foreground, and walls as well.
+            Render.DrawAt(Render.Layer.BACKGROUND, 0);
+            Raylib.DrawTexture(background.texture, - (int)Mastermind.Eyes.X, - (int)Mastermind.Eyes.Y, Color.WHITE);
+            Render.DoneDraw();
+
+            foreach (Wall wall in Walls)
+            {
+                wall.Draw();
+            }
+
             foreach (Slave slave in Slaves)
             {
                 slave.Draw();
@@ -156,9 +178,30 @@ namespace Hivemind
 
     class Wall
     {
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public int Height { get; private set; }
+        public int Width { get; private set; }
+        RenderTexture2D render;
         public Wall(MetaWall meta, TileSet tileSet)
         {
+            X = meta.X * tileSet.TileWidth;
+            Y = meta.Y * tileSet.TileHeight;
+            Height = meta.Height * tileSet.TileWidth;
+            Width = meta.Width * tileSet.TileHeight;
             // Remember to do a RenderTexture2D to save what it looks like.
+            render = Raylib.LoadRenderTexture(meta.Width * tileSet.TileWidth, meta.Height * tileSet.TileHeight);
+            Raylib.BeginTextureMode(render);
+            tileSet.Print(meta.Layout, meta.Width, meta.Height);
+            Raylib.EndTextureMode();
+        }
+
+        public void Draw()
+        {
+            Render.DrawAt(Render.Layer.MID_GROUND, Y);
+            Raylib.DrawTexture(render.texture, X - (int)Mastermind.Eyes.X, Y - Height - (int)Mastermind.Eyes.Y, Color.WHITE);
+            Raylib.DrawPixel(X - (int)Mastermind.Eyes.X, Y - (int)Mastermind.Eyes.Y, Color.BLUE);
+            Render.DoneDraw();
         }
     }
 

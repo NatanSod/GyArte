@@ -42,7 +42,11 @@ namespace Hivemind
         public void Draw()
         {
             Render.DrawAt(Render.Layer.MID_GROUND, (int)Position.Y);
-            stand.Draw(Facing, 0, (int)Position.X, (int)Position.Y); // I will not support an NPC with different animations until I have made one.
+            int height = 36;
+            Raylib_cs.Raylib.DrawRectangle((int)(Position.X - Mastermind.Eyes.X) - (Width >> 1), (int)(Position.Y - Mastermind.Eyes.Y) - height + (Length >> 1), Width, height, Raylib_cs.Color.LIGHTGRAY);
+            Raylib_cs.Raylib.DrawRectangle((int)(Position.X - Mastermind.Eyes.X) - (Width >> 1), (int)(Position.Y - Mastermind.Eyes.Y) - height - (Length >> 1), Width, Length, Raylib_cs.Color.GRAY);
+
+            stand.Draw(Facing, 0, (int)(Position.X - Mastermind.Eyes.X), (int)(Position.Y - Mastermind.Eyes.Y)); // I will not support an NPC with different animations until I have made one.
             Render.DoneDraw();
         }
 

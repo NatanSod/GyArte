@@ -38,6 +38,7 @@ Player can now use SpriteSheet, though it doesn't really use animations yet. I m
 4 - Messed up test sheet
 Scratch that previous one, I accidentally made the sprite for standing while looking left instead point to the right. How did I miss that?
 
+
 5 - Replace GameMaster with Hivemind 
 Create Mastermind, Slave, and Hive. The main difference between Hivemind and GameMaster is that Hivemind won't be future proofed. It will be what I need and nothing more, because I spend way too much time thinking about "Oh, what if I want to do ___?" and doing something I might never need.
 As a first step to say "I don't care about the future, now is what's important!" I changed each Vector3 to a Vector2.
@@ -70,3 +71,7 @@ Decided to steal a bunch of code from Yarn Spinner. It can be found at, https://
 However, I did not finnish integrating the stolen code because it is too much and I don't need it at the moment. I will therefore do that when I have time and need to.
 I did however change how line information is sent from DialogueRunner to DialogueHandler. Before, DH asked DR for the next line and received it if available. Now, DR is asked to continue and then it tells DH what to do.
 I also probably did a whole lot of other things, because I got very sidetracked throughout.
+
+
+8 - Hive & TileSet
+I made TileSet able to function, which includes making it able to draw each tile into a RenderTexture2D, turning the background into a single texture. As part of that I also made Hive display the background and walls. I also made it so that there's a camera that follows the player (as long as they don't leave the hive). And for no reason I made it so that a boolean decides weather or not everything drawn at the DEBUG layer is actually going to be displayed.

@@ -16,7 +16,7 @@ namespace GyArte
             sheet = Raylib.LoadTexture($"Assets/Sprites/S_{Name}.png");
 
             string json = File.ReadAllText($"Assets/Sprites/S_{Name}.png.json");
-            MetaAnimation[] metaData = JsonSerializer.Deserialize<MetaAnimation[]>(json, Hivemind.Mastermind.jsonOptions) ?? throw new Exception($"{Name}.png.json broke.");
+            MetaAnimation[] metaData = JsonSerializer.Deserialize<MetaAnimation[]>(json, Hivemind.Mastermind.jsonOptions) ?? throw new Exception($"S_{Name}.png.json broke.");
             animations = new Animation[metaData.Length];
 
             for (int i = 0; i < metaData.Length; i++)
@@ -79,7 +79,8 @@ namespace GyArte
                     frames[dir][frm] = Raylib.LoadRenderTexture(meta.Width, meta.Height);
                     Raylib.BeginTextureMode(frames[dir][frm]);
                     Raylib.ClearBackground(Color.BLANK);
-                    Raylib.DrawTexturePro(sheet, new Rectangle(meta.StartX + frm * Width, meta.StartY + dir * Height, Width, -Height), new Rectangle(0, 0, Width, Height), Vector2.Zero, 0, Color.WHITE);
+                    Raylib.DrawTexturePro(sheet, new Rectangle(meta.StartX + frm * Width, meta.StartY + dir * Height, Width, -Height), 
+                                          new Rectangle(0, 0, Width, Height), Vector2.Zero, 0, Color.WHITE);
                     Raylib.EndTextureMode();
                 }
             }
