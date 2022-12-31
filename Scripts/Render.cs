@@ -66,7 +66,7 @@ namespace GyArte
             Raylib.InitWindow(DisplayWidth, DisplayHeight, "Game");
 
             Raylib.SetWindowMinSize(renderWidth, renderHeight);
-            
+
         }
 
         static void Resize()
@@ -111,7 +111,7 @@ namespace GyArte
         }
 
         static bool isDrawing = false;
-        public static void BeginDrawing()
+        public static void BeginFrame()
         {
             if (isDrawing) throw new Exception("It's already drawing");
             // Before doing anything, handle the window being resized.
@@ -120,18 +120,16 @@ namespace GyArte
 
             // Maybe make a variable that decides if it's able to draw.
             Raylib.BeginDrawing();
-
-            // Raylib.DrawRectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight, Color.WHITE);
         }
 
-        public static void EndDrawing()
+        public static void EndFrame()
         {
             if (!isDrawing) throw new Exception("It wasn't drawing");
             isDrawing = false;
             // Make a variable that decides if it's able to draw.
 
             Raylib.ClearBackground(Color.BLACK); // If something wasn't drawn properly, dispose of it.
-            Raylib.DrawRectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight, Color.WHITE);
+            // Raylib.DrawRectangle(LeftMargin, TopMargin, DisplayWidth, DisplayHeight, Color.WHITE);
 
 
             foreach (Drawing drawing in drawings)
@@ -155,7 +153,7 @@ namespace GyArte
             public int Distance { get; private set; }
             public Texture2D Texture { get => renderTexture.texture; }
             private RenderTexture2D renderTexture;
-            public Drawing (Layer layer, int distance, RenderTexture2D texture)
+            public Drawing(Layer layer, int distance, RenderTexture2D texture)
             {
                 Layer = layer;
                 Distance = distance;
@@ -174,11 +172,11 @@ namespace GyArte
         private static RenderTexture2D capture;
 
         /// <summary>
-        /// Call this before using raylib to draw anything. It will make sure the correct things are drawn on top. Call <see cref ="DoneDraw"/> as soon as it's done.
+        /// Call this before using raylib to draw anything. It will make sure the correct things are drawn on top. Call <see cref ="EndDraw"/> as soon as it's done.
         /// </summary>
         /// <param name="layer">The layer it will be drawn to.</param>
         /// <param name="distance">The distance from the camera, so that closer things on the same layer are on top.</param>
-        public static void DrawAt(Layer layer, int distance)
+        public static void BeginDraw(Layer layer, int distance)
         {
             if (layer == Layer.NONE) return;
             capture = Raylib.LoadRenderTexture(Width, Height);
@@ -189,12 +187,12 @@ namespace GyArte
             _currentDistance = distance;
         }
 
-        public static void DoneDraw()
+        public static void EndDraw()
         {
             if (_currentLayer == Layer.NONE) return;
             Raylib.EndTextureMode();
             int i = 0;
-            foreach(Drawing drawing in drawings)
+            foreach (Drawing drawing in drawings)
             {
                 // Continue until it reaches one that is larger than itself or ends.
                 if (_currentLayer < drawing.Layer || (_currentLayer == drawing.Layer && _currentDistance < drawing.Distance))

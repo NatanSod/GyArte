@@ -17,11 +17,14 @@ namespace Hivemind
         public int ActualWidth { get; private set; }
         public int ActualLength { get; private set; }
 
+        // These are arrays and not lists because I prefer them when the items contained in them never change.
         public Tile[] Layout { get; private set; }
         public Wall[] Walls { get; private set; }
         public Slave[] Slaves { get; private set; }
 
         RenderTexture2D background;
+        TileSet tileSet;
+        Player Victim => Mastermind.victim;
 
         public Hive(string name)
         {
@@ -33,31 +36,24 @@ namespace Hivemind
             Width = meta.Width;
             Length = meta.Length;
 
-            TileSet tileSet = new TileSet(meta.TileSet);
+            tileSet = new TileSet(meta.TileSet);
 
             ActualWidth = Width * tileSet.TileWidth;
             ActualLength = Length * tileSet.TileHeight;
 
-            Layout = new Tile[meta.Layout.Length];
-            for (int i = 0; i < Layout.Length; i++)
-            {
-                Layout[i] = tileSet.GetTile(meta.Layout[i]);
-            }
+            // Get the background and the layout.
             background = Raylib.LoadRenderTexture(Width * tileSet.TileWidth, Length * tileSet.TileHeight);
             Raylib.BeginTextureMode(background);
-            tileSet.Print(meta.Layout, Width, Length);
+            Raylib.ClearBackground(Color.BLACK);
+            Layout = tileSet.Print(meta.Layout, Width, Length);
             Raylib.EndTextureMode();
-            
 
-            // Then figure out the background and foreground from that.
-
+            // Then get all the walls.
             Walls = new Wall[meta.Walls.Length];
             for (int i = 0; i < Walls.Length; i++)
             {
                 Walls[i] = new Wall(meta.Walls[i], tileSet);
             }
-
-            tileSet.Kill();
 
             Slaves = new Slave[meta.Slaves.Length];
             for (int i = 0; i < Slaves.Length; i++)
@@ -81,9 +77,9 @@ namespace Hivemind
         public void Update()
         {
             // Remember to draw the background, foreground, and walls as well.
-            Render.DrawAt(Render.Layer.BACKGROUND, 0);
-            Raylib.DrawTexture(background.texture, - (int)Mastermind.Eyes.X, - (int)Mastermind.Eyes.Y, Color.WHITE);
-            Render.DoneDraw();
+            Render.BeginDraw(Render.Layer.BACKGROUND, 0);
+            Raylib.DrawTexture(background.texture, -(int)Mastermind.Eyes.X, -(int)Mastermind.Eyes.Y, Color.WHITE);
+            Render.EndDraw();
 
             foreach (Wall wall in Walls)
             {
@@ -108,28 +104,106 @@ namespace Hivemind
             return null;
         }
 
-        public byte CheckCollision(int x, int y, Player player)
+        public Tile GetTile(Vector2 worldPosition)
         {
-            byte result = 0;
-            // Remember to check the collisions with walls.
-            Rectangle rect1 = new Rectangle(x - player.Width / 2, y - player.Length / 2, player.Width, player.Length);
-            foreach (Slave slave in Slaves)
+            int x = (int)MathF.Floor(worldPosition.X / tileSet.TileWidth);
+            int y = (int)MathF.Floor(worldPosition.Y / tileSet.TileHeight);
+            if (x < 0 || y < 0 || x >= Width || y >= Length)
             {
-                if (!slave.Solid) continue;
-
-                Rectangle rect2 = new Rectangle(slave.Position.X - slave.Width / 2, slave.Position.Y - slave.Length / 2, slave.Width, slave.Length);
-                Rectangle collision = Raylib.GetCollisionRec(rect1, rect2);
-                if (collision.width != 0 && collision.height != 0)
-                {
-                    // Check which sides are overlapping with something. I don't know how, just do it.
-                }
+                return TileSet.Empty;
             }
-            return result;
+            return Layout[y * Width + x];
         }
 
-        public Slave? Interact(int x, int y, Player player)
+        public Vector2? CheckCollision(Vector2 goal)
         {
-            Rectangle rect1 = new Rectangle(x - player.Width / 2, y - player.Length / 2, player.Width, player.Length);
+            bool collided = false;
+            Vector2 start = Victim.Position;
+            Vector2 velocity = goal - start;
+            Vector2 xGoal = new Vector2(goal.X, start.Y);
+            Vector2 yGoal = new Vector2(start.X, goal.Y);
+            
+            // First, collide with the tile walls and figure out where you should go from there.
+            if (velocity.Y != 0)
+            {
+                if
+                (
+                    GetTile(yGoal + new Vector2((Victim.Width / 2 - 1), Victim.Length / 2 * MathF.Sign(velocity.Y))).Solid
+                    || GetTile(yGoal + new Vector2(-(Victim.Width / 2 - 1), Victim.Length / 2 * MathF.Sign(velocity.Y))).Solid
+                )
+                {
+                    collided = true;
+                    if (velocity.Y > 0)
+                    {
+                        goal += Vector2.UnitY * -((goal.Y + Victim.Length / 2) % tileSet.TileHeight);
+                    }
+                    else
+                    {
+                        goal += Vector2.UnitY * -((goal.Y % tileSet.TileHeight) - Victim.Length / 2);
+                    }
+                }
+            }
+            if (velocity.X != 0)
+            {
+                if
+                (
+                    GetTile(xGoal + new Vector2(Victim.Width / 2 * MathF.Sign(velocity.X), (Victim.Length / 2 - 1))).Solid
+                    || GetTile(xGoal + new Vector2(Victim.Width / 2 * MathF.Sign(velocity.X), -(Victim.Length / 2 - 1))).Solid
+                )
+                {
+                    collided = true;
+                    if (velocity.X > 0)
+                    {
+                        goal += Vector2.UnitX * -((goal.X + Victim.Width / 2) % tileSet.TileWidth);
+                    }
+                    else
+                    {
+                        goal += Vector2.UnitX * -((goal.X % tileSet.TileWidth) - Victim.Width / 2);
+                    }
+                }
+            }
+
+            // Then, get each slave that falls within the danger zone.
+            Rectangle dangerZone = DefineDanger(goal);
+            foreach (Slave slave in Slaves)
+            {
+                float sXtl, sYtl;
+                sXtl = slave.Position.X - slave.Width / 2;
+                sYtl = slave.Position.Y - slave.Length / 2;
+                Rectangle slaveZone = new Rectangle(sXtl, sYtl, slave.Width, slave.Length);
+                Rectangle overlap = Raylib.GetCollisionRec(dangerZone, slaveZone);
+                if (overlap.width != 0 && overlap.height != 0)
+                {
+                    collided = true;
+                    if (overlap.height <= overlap.width && velocity.Y != 0 
+                    || ((MathF.Sign(velocity.X) < 0 && overlap.x != dangerZone.x) || (MathF.Sign(velocity.X) > 0 && overlap.x != slaveZone.x)))
+                    {
+                        if (overlap.height > MathF.Abs(velocity.Y))
+                        {
+                            goal = start + new Vector2(velocity.X, 0);
+                        }
+                        else
+                        {
+                            goal -= Vector2.UnitY * (overlap.height * MathF.Sign(velocity.Y));
+                        }
+                    }
+                    else
+                    {
+                        goal += Vector2.UnitX * (overlap.width * - MathF.Sign(velocity.X));
+                    }
+                    // Update velocity and reshape the dangerZone.
+                    velocity = goal - start;
+                    dangerZone = DefineDanger(goal);
+                }
+            }
+            return collided ? goal : null;
+
+            Rectangle DefineDanger(Vector2 goal) => new Rectangle(goal.X - Victim.Width / 2, goal.Y - Victim.Length / 2, Victim.Width, Victim.Length);
+        }
+
+        public Slave? Interact(int x, int y)
+        {
+            Rectangle rect1 = new Rectangle(x - Mastermind.victim.Width / 2, y - Mastermind.victim.Length / 2, Mastermind.victim.Width, Mastermind.victim.Length);
             foreach (Slave slave in Slaves)
             {
                 if (slave.Interaction == null || !slave.Solid) continue;
@@ -144,7 +218,7 @@ namespace Hivemind
             return null;
         }
 
-        public Slave? Trigger(int x, int y, Player player)
+        public Slave? Trigger(int x, int y)
         {
             foreach (Slave slave in Slaves)
             {
@@ -169,7 +243,7 @@ namespace Hivemind
         public int Length { get; set; }
 
         public string TileSet { get; set; } = "";
-        public int[] Layout { get; set; } = new int[0];
+        public int?[] Layout { get; set; } = new int?[0];
 
         public MetaWall[] Walls { get; set; } = new MetaWall[0];
 
@@ -198,10 +272,10 @@ namespace Hivemind
 
         public void Draw()
         {
-            Render.DrawAt(Render.Layer.MID_GROUND, Y);
+            Render.BeginDraw(Render.Layer.MID_GROUND, Y);
             Raylib.DrawTexture(render.texture, X - (int)Mastermind.Eyes.X, Y - Height - (int)Mastermind.Eyes.Y, Color.WHITE);
             Raylib.DrawPixel(X - (int)Mastermind.Eyes.X, Y - (int)Mastermind.Eyes.Y, Color.BLUE);
-            Render.DoneDraw();
+            Render.EndDraw();
         }
     }
 
@@ -211,6 +285,6 @@ namespace Hivemind
         public int Y { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
-        public int[] Layout { get; set; } = new int[0];
+        public int?[] Layout { get; set; } = new int?[0];
     }
 }

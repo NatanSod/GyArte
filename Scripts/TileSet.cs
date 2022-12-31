@@ -13,6 +13,21 @@ namespace GyArte
         Texture2D sheet;
         Tile[] tiles;
 
+        static Tile empty;
+        /// <summary>
+        /// A solid tile with no texture for when the tile id is null.
+        /// Used in walls to not block the background, used in backgrounds to be the void.
+        /// </summary>
+        public static Tile Empty { get => empty; }
+
+        static TileSet ()
+        {
+            empty = new Tile(Raylib.LoadRenderTexture(4, 4), new MetaTile() { Solid = true });
+            Raylib.BeginTextureMode(empty.Render);
+            Raylib.ClearBackground(Color.BLACK);
+            Raylib.EndTextureMode();
+        }
+
         public TileSet(string name)
         {
             sheet = Raylib.LoadTexture($"Assets/TileSets/T_{name}.png");
@@ -25,43 +40,65 @@ namespace GyArte
             TileWidth = metaData.TileWidth;
             TileHeight = metaData.TileHeight;
 
-            tiles = new Tile[Height * Width];
+            tiles = new Tile[metaData.TileData.Length];
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     int index = y * Width + x;
-                    Tile tile = new Tile(Raylib.LoadRenderTexture(TileWidth, TileHeight));
+                    if (index >= tiles.Length) break;
+
+                    Tile tile = new Tile(Raylib.LoadRenderTexture(TileWidth, TileHeight), metaData.TileData[index]);
                     tiles[index] = tile;
+
                     Raylib.BeginTextureMode(tile.Render);
-                    Raylib.DrawTexturePro(sheet, new Rectangle(x * TileWidth, y * TileHeight, TileWidth, -TileHeight), 
+                    Raylib.DrawTexturePro(sheet, new Rectangle(x * TileWidth, y * TileHeight, TileWidth, -TileHeight),
                                           new Rectangle(0, 0, TileWidth, TileHeight), Vector2.Zero, 0, Color.WHITE);
                     Raylib.EndTextureMode();
                 }
             }
         }
 
-        public Tile GetTile(int id)
+        public Tile GetTile(int? id)
         {
-            if (id >= tiles.Length)
+            if (id == null || id < 0 || id >= tiles.Length)
             {
-                
+                return Empty;
             }
-            return tiles[id];
+            return tiles[(int)id];
         }
 
-        public void Print(int[] layout, int width, int height)
+        /// <summary>
+        /// Draws the entire layout for the purpose of being captured with TextureMode. 
+        /// Also returns an array of the layout in tile form.
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public Tile[] Print(int?[] layout, int width, int height)
         {
+            Tile[] result = new Tile[layout.Length];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int id = layout[y * width + x];
-                    Tile tile = tiles[id];
-                    Raylib.DrawTexturePro(tile.Render.texture, new Rectangle(0, 0, TileWidth, -TileHeight), 
+                    int index = y * width + x;
+                    int? id = layout[index];
+                    
+                    if (id == null)
+                    {
+                        result[index] = Empty;
+                        continue;
+                    }
+
+                    Tile tile = tiles[(int)id];
+                    Raylib.DrawTexturePro(tile.Render.texture, new Rectangle(0, 0, TileWidth, -TileHeight),
                                           new Rectangle(x * TileWidth, (height - y - 1) * TileHeight, TileWidth, TileHeight), Vector2.Zero, 0, Color.WHITE);
+                    result[index] = tile;
                 }
             }
+            return result;
         }
 
         public void Kill()
@@ -80,15 +117,23 @@ namespace GyArte
         public int Height { get; set; }
         public int TileWidth { get; set; }
         public int TileHeight { get; set; }
+        public MetaTile[] TileData { get; set; } = new MetaTile[0];
     }
 
     class Tile
     {
         public RenderTexture2D Render { get; private set; }
+        public bool Solid { get; private set; }
 
-        public Tile(RenderTexture2D render)
+        public Tile(RenderTexture2D render, MetaTile meta)
         {
             Render = render;
+            Solid = meta.Solid;
         }
+    }
+
+    class MetaTile
+    {
+        public bool Solid { get; set; }
     }
 }

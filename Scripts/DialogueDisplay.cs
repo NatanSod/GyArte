@@ -119,7 +119,7 @@ namespace GyArte
 
             int i = 0;
 
-            Render.DrawAt(Render.Layer.UI, 1);
+            Render.BeginDraw(Render.Layer.UI, 1);
             nameBox.Draw(nameLayout);
 
             if (currentLine.s != null)
@@ -146,8 +146,8 @@ namespace GyArte
                     i++;
                 }
             }
-            Render.DoneDraw();
-            Render.DrawAt(Render.Layer.UI, 0);
+            Render.EndDraw();
+            Render.BeginDraw(Render.Layer.UI, 0);
             dialogueBox.Draw();
             i = 0;
 
@@ -191,7 +191,7 @@ namespace GyArte
                                     currentColor);
                     i++;
                 }
-                Render.DoneDraw();
+                Render.EndDraw();
             }
         }
 
@@ -199,7 +199,7 @@ namespace GyArte
         {
             Display();
 
-            Render.DrawAt(Render.Layer.UI, 0);
+            Render.BeginDraw(Render.Layer.UI, 0);
             int[] origins = optionBox.Draw(optionLayouts, option);
             for (int i = 0; i < origins.Length; i++)
             {
@@ -260,7 +260,7 @@ namespace GyArte
                     }
                 }
             }
-            Render.DoneDraw();
+            Render.EndDraw();
         }
 
         public static TextLayout MakeLayout(SpanCollection spanCollection, ITextBox textBox)

@@ -2,5 +2,20 @@
     "Width": 2,
     "Height": 2,
     "TileWidth": 32,
-    "TileHeight": 32
+    "TileHeight": 32,
+    "TileData": 
+    [
+        {
+            "Solid": false
+        },
+        {
+            "Solid": false
+        },
+        {
+            "Solid": false
+        },
+        {
+            "Solid": false
+        }
+    ]
 }

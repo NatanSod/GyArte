@@ -121,11 +121,11 @@ namespace Hivemind
             mouthpiece.Draw();
         }
 
-        static public byte CheckCollision(int x, int y) => currentHive.CheckCollision(x, y, victim);
+        static public Vector2? CheckCollision(Vector2 goal) => currentHive.CheckCollision(goal);
 
         static public Player.State? Interact(int x, int y)
         {
-            Slave? interacting = currentHive.Interact(x, y, victim);
+            Slave? interacting = currentHive.Interact(x, y);
 
             if (interacting?.Interaction == null) return null;
 
@@ -144,7 +144,7 @@ namespace Hivemind
 
         static public Player.State? Trigger(int x, int y)
         {
-            Slave? trigger = currentHive.Trigger(x, y, victim);
+            Slave? trigger = currentHive.Trigger(x, y);
 
             if (trigger?.Interaction == null) return null;
 

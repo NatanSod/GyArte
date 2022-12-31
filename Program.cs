@@ -20,22 +20,22 @@ namespace GyArte
 
             while (!Raylib.WindowShouldClose())
             {
-                Render.BeginDrawing();
+                Render.BeginFrame();
 
-                Render.DrawAt(Render.Layer.DEBUG, 0);
+                Render.BeginDraw(Render.Layer.DEBUG, 0);
                 Raylib.DrawRectangle(-25, -25, 50, 50, Color.MAGENTA);
                 Raylib.DrawRectangle(Render.Width - 25, -25, 50, 50, Color.GREEN);
                 Raylib.DrawRectangle(-25, Render.Height - 25, 50, 50, Color.GREEN);
                 Raylib.DrawRectangle(Render.Width - 25, Render.Height - 25, 50, 50, Color.YELLOW);
                 Raylib.DrawText(Mastermind.cycles.ToString(), 50, 30, 10, Color.BLACK);
                 Raylib.DrawFPS(50, 40);
-                Render.DoneDraw();
+                Render.EndDraw();
 
 
                 Mastermind.Contemplate();
 
 
-                Render.EndDrawing();
+                Render.EndFrame();
             }
         }
     }

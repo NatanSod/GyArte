@@ -7,7 +7,6 @@ using GyArte;
 
 namespace Hivemind
 {
-    // TODO: Make the player character unresponsive when dialogue is happening.
     class Player : ITrailblazer
     {
         public enum State
@@ -24,9 +23,9 @@ namespace Hivemind
         int height = 36;
 
         public Vector2 Position { get; private set; } = new Vector2(Render.Width / 2, Render.Height / 2);
+        public Vector2 Facing { get; private set; }  = Vector2.UnitY;
         public float Time { get; private set; } = 0;
         Vector2 velocity = Vector2.Zero;
-        Vector2 facing = Vector2.UnitY;
         float speed = 4;
         Trail trail;
         DialogueHandler dh { get => Mastermind.mouthpiece; }
@@ -69,6 +68,9 @@ namespace Hivemind
 
         void Walk()
         {
+            Vector2 previousDirection = velocity;
+            velocity = Vector2.Zero;
+
             // Figure out where to move to.
             if (Raylib.IsKeyDown(KeyboardKey.KEY_W)) { velocity -= Vector2.UnitY; }
             if (Raylib.IsKeyDown(KeyboardKey.KEY_S)) { velocity += Vector2.UnitY; }
@@ -79,28 +81,49 @@ namespace Hivemind
                 Position = new Vector2(Render.Width / 2, Render.Height / 2);
             }
 
-            if (velocity.Length() != 0)
+            float magnitude = velocity.Length();
+            if (magnitude != 0)
             {
-                // If they changed directions, add it to the list of changed direction positions.
-                if (velocity != facing)
+                state = State.WALK;
+
+                // The magnitude is greater than zero. 
+                if (magnitude == 1)
+                {
+                    // It isn't moving diagonally, so simply make the facing the same as the velocity.
+                    Facing = velocity;
+                }
+                // The magnitude is greater than one, so it's moving diagonally.
+                else if ((velocity + Facing).Length() < magnitude)
+                {
+                    // The current velocity is in a different direction from where it is currently facing, make facing equal the horizontal length of velocity.
+                    Facing = new Vector2(velocity.X, 0);
+                }
+                // else 
+                // It's moving diagonally, but it's in the same direction as the current facing, so we keep the current facing.
+
+                velocity = Vector2.Normalize(velocity) * speed;
+
+                Vector2 goal = Position + velocity;
+                Vector2? move = Mastermind.CheckCollision(goal);
+                if (move != null)
+                {
+                    goal = (Vector2)move;
+                    if (goal == Position) return;
+                    velocity = goal - Position;
+                }
+                if (velocity != previousDirection)
                 {
                     trail.MakeKey();
                 }
 
-                facing = velocity;
-
-                velocity = Vector2.Normalize(velocity) * speed;
-
-                // Put the collision logic here somewhere.
-                Position += velocity;
-
+                Position = goal;
+                
                 Time++;
-                velocity = Vector2.Zero;
-                state = State.WALK;
             }
             else
             {
                 state = State.STAND;
+                velocity = previousDirection;
             }
         }
 
@@ -109,7 +132,7 @@ namespace Hivemind
             // It interacted without me pressing space.
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
             {
-                State? s = Mastermind.Interact((int)(Position.X + facing.X * Width), (int)(Position.Y + facing.Y * Length));
+                State? s = Mastermind.Interact((int)(Position.X + Facing.X * Width), (int)(Position.Y + Facing.Y * Length));
 
                 if (s != null)
                 {
@@ -142,19 +165,19 @@ namespace Hivemind
 
         public void Draw()
         {
-            Render.DrawAt(Render.Layer.DEBUG, 0);
+            Render.BeginDraw(Render.Layer.DEBUG, 0);
 
             Vector2 previous = trail[0].Pos;
             for (int i = 1; i < trail.Count; i++)
             {
                 Vector2 pos = trail[i].Pos;
-                Raylib.DrawLine((int)(previous.X - Mastermind.Eyes.X), (int)(previous.Y - Mastermind.Eyes.Y), 
+                Raylib.DrawLine((int)(previous.X - Mastermind.Eyes.X), (int)(previous.Y - Mastermind.Eyes.Y),
                                 (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y), Color.LIME);
-                Raylib.DrawRectangle((int)(previous.X -Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
+                Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
                 previous = pos;
             }
             Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
-            Render.DoneDraw();
+            Render.EndDraw();
 
             float thirdLength = trail.Lifespan / 3;
             // Draw them from the last one to the first one so that the first one is drawn on top.
@@ -184,7 +207,7 @@ namespace Hivemind
                 }
 
                 Vector2 pos = trail.GetPositionAt(i * thirdLength);
-                Render.DrawAt(Render.Layer.MID_GROUND, (int)pos.Y);
+                Render.BeginDraw(Render.Layer.MID_GROUND, (int)pos.Y);
 
                 Raylib.DrawRectangle((int)(pos.X - Mastermind.Eyes.X) - (Width >> 1), (int)(pos.Y - Mastermind.Eyes.Y) - height + (Length >> 1), Width, height, color);
 
@@ -201,13 +224,13 @@ namespace Hivemind
                         stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
                         break;
                     case State.TALK:
-                        direction = DirectionIndexFromVector(facing);
+                        direction = DirectionIndexFromVector(Facing);
                         stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
                         break;
                     default:
                         throw new Exception("Not ready to display that state yet.");
                 }
-                Render.DoneDraw();
+                Render.EndDraw();
             }
         }
 

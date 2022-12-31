@@ -10,10 +10,12 @@ namespace GyArte
     public struct PositionKey
     {
         public Vector2 Pos { get; private set; } // The position.
+        public Vector2 Dir { get; private set; } // The direction it's facing
         public float Creation { get; private set; } // The time it was created. Birth would be more accurate, but it would also be weirder.
-        public PositionKey(Vector2 position, float creation)
+        public PositionKey(Vector2 position, Vector2 facing, float creation)
         {
             Pos = position;
+            Dir = facing;
             Creation = creation;
         }
     }
@@ -24,11 +26,12 @@ namespace GyArte
     interface ITrailblazer
     {
         public Vector2 Position { get; } // The position.
+        public Vector2 Facing { get; } // The direction it's facing
         public float Time { get; } // The current Time.
 
         public PositionKey FrozenCopy()
         {
-            return new PositionKey(Position, Time);
+            return new PositionKey(Position, Facing, Time);
         }
     }
 
@@ -70,7 +73,7 @@ namespace GyArte
                 PositionKey to = this[1];
                 float progress = (age - _lifespan) / (to.Creation - from.Creation);
                 Vector2 pos = LinearInterpolate(from.Pos, to.Pos, progress);
-                return new PositionKey(pos, trailblazer.Time - _lifespan);
+                return new PositionKey(pos, from.Dir, trailblazer.Time - _lifespan);
             }
         }
         /// <summary>
@@ -96,9 +99,21 @@ namespace GyArte
         // Save the current position and time, but not if the time since the last one is equal to or less than 0.
         public bool MakeKey()
         {
-            if (trailblazer.Time <= positionKeys[positionKeys.Count - 1].Creation) return false; // Don't add one that is older than or equal in age to the youngest position.
-            positionKeys.Add(trailblazer.FrozenCopy());
-            Trim();
+            if (trailblazer.Time < positionKeys[positionKeys.Count - 1].Creation) 
+            {
+                // Don't add one that is older than the youngest position.
+                return false; 
+            }
+            else if (trailblazer.Time == positionKeys[positionKeys.Count - 1].Creation)
+            {
+                // If the new key would be equal in age to the youngest, then replace it.
+                positionKeys[positionKeys.Count - 1] = trailblazer.FrozenCopy();
+            }
+            else
+            {
+                positionKeys.Add(trailblazer.FrozenCopy());
+                Trim();
+            }
             return true;
         }
 
@@ -148,8 +163,9 @@ namespace GyArte
             if (positionKeys.Count == 1 || timePoint >= positionKeys[positionKeys.Count - 1].Creation)
             {
                 // It is asking for the direction from the newest position to the current position.
-                Vector2 dir = Vector2.Normalize(trailblazer.Position - positionKeys[positionKeys.Count - 1].Pos);
-                return dir;
+                return trailblazer.Facing;
+                // Vector2 dir = Vector2.Normalize(trailblazer.Position - positionKeys[positionKeys.Count - 1].Pos);
+                // return dir;
             }
             else
             {
@@ -160,11 +176,11 @@ namespace GyArte
                     i++;
                 }
 
-
-                Vector2 pos1 = positionKeys[i - 1].Pos;
-                Vector2 pos2 = positionKeys[i].Pos;
-                Vector2 dir = Vector2.Normalize(pos2 - pos1);
-                return dir;
+                return positionKeys[i - 1].Dir;
+                // Vector2 pos1 = positionKeys[i - 1].Pos;
+                // Vector2 pos2 = positionKeys[i].Pos;
+                // Vector2 dir = Vector2.Normalize(pos2 - pos1);
+                // return dir;
             }
         }
 
