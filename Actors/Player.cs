@@ -39,6 +39,16 @@ namespace Hivemind
             trail = new Trail(this, 25 * 4 / speed);
         }
 
+        public Player(Vector2 position)
+        {
+            Position = position;
+            spriteSheet = Mastermind.LoadSheet("Test");
+            stand = spriteSheet.GetAnimation("stand");
+            walk = spriteSheet.GetAnimation("walk");
+
+            trail = new Trail(this, 25 * 4 / speed);
+        }
+
         SpriteSheet spriteSheet;
         Animation stand;
         Animation walk;

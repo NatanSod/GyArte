@@ -80,3 +80,8 @@ I made TileSet able to function, which includes making it able to draw each tile
 9 - Collision
 I made the player unable to pass through solid tiles and solid slaves. For this, I of course added the functionality for tiles to be solid. The collision is rather rough and has some corners cut. However, I do not believe any human would be able to notice. Currently, the only solid tile is the hard coded empty tile.
 I changed how it decides which walk sprite to show when moving diagonally. Before it showed the horizontal walk sprite, now it shows the sprite it showed before (if it was in the right direction). For this to work with the trailing party members, PositionKey needed to access and remember the direction the trailblazer is facing, so it now does.
+
+
+10 - Switch Hive
+Made it unload the textures for the previous hive before loading the new ones. The Hive now also contain a list of "Entrances", which is just a list of the positions the player will start at, meaning that every door into a room won't place the player in the same spot. It will create a new Player at that position because I did not want to deal with resetting the trail stuff. This means some data needs to be stored externally.
+Next step: Saving & Loading. (Dear god help me.)

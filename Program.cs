@@ -33,6 +33,10 @@ namespace GyArte
 
 
                 Mastermind.Contemplate();
+                if (Raylib.IsKeyPressed(KeyboardKey.KEY_C))
+                {
+                    Mastermind.ConstructHive("Test2", 0);
+                }
 
 
                 Render.EndFrame();

@@ -78,10 +78,13 @@ namespace Hivemind
             Console.WriteLine("It has awoken.");
         }
 
-        static public void ConstructHive(string name)
+        static public void ConstructHive(string name, int position)
         {
             // Add a bit more fanfare maybe.
+            currentHive.Deconstruct();
             currentHive = new Hive(name);
+            Vector2 start = currentHive.Entrances[position];
+            victim = new Player(start);
         }
 
         /// <summary>

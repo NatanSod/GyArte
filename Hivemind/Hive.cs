@@ -21,6 +21,7 @@ namespace Hivemind
         public Tile[] Layout { get; private set; }
         public Wall[] Walls { get; private set; }
         public Slave[] Slaves { get; private set; }
+        public Vector2[] Entrances { get; private set; }
 
         RenderTexture2D background;
         TileSet tileSet;
@@ -72,6 +73,22 @@ namespace Hivemind
 
                 Slaves[i] = new Slave(meta.Slaves[i]);
             }
+
+            Entrances = new Vector2[meta.Entrances.Length];
+            for (int i = 0; i < Entrances.Length; i ++)
+            {
+                Entrances[i] = new Vector2(meta.Entrances[i].X + .5f, meta.Entrances[i].Y + .5f) * new Vector2(tileSet.TileWidth, tileSet.TileHeight);
+            }
+        }
+
+        public void Deconstruct()
+        {
+            tileSet.Kill();
+            Raylib.UnloadRenderTexture(background);
+            foreach (Wall wall in Walls)
+            {
+                wall.Kill();
+            }
         }
 
         public void Update()
@@ -122,7 +139,7 @@ namespace Hivemind
             Vector2 velocity = goal - start;
             Vector2 xGoal = new Vector2(goal.X, start.Y);
             Vector2 yGoal = new Vector2(start.X, goal.Y);
-            
+
             // First, collide with the tile walls and figure out where you should go from there.
             if (velocity.Y != 0)
             {
@@ -175,7 +192,7 @@ namespace Hivemind
                 if (overlap.width != 0 && overlap.height != 0)
                 {
                     collided = true;
-                    if (overlap.height <= overlap.width && velocity.Y != 0 
+                    if (overlap.height <= overlap.width && velocity.Y != 0
                     || ((MathF.Sign(velocity.X) < 0 && overlap.x != dangerZone.x) || (MathF.Sign(velocity.X) > 0 && overlap.x != slaveZone.x)))
                     {
                         if (overlap.height > MathF.Abs(velocity.Y))
@@ -189,7 +206,7 @@ namespace Hivemind
                     }
                     else
                     {
-                        goal += Vector2.UnitX * (overlap.width * - MathF.Sign(velocity.X));
+                        goal += Vector2.UnitX * (overlap.width * -MathF.Sign(velocity.X));
                     }
                     // Update velocity and reshape the dangerZone.
                     velocity = goal - start;
@@ -248,6 +265,13 @@ namespace Hivemind
         public MetaWall[] Walls { get; set; } = new MetaWall[0];
 
         public MetaSlave[] Slaves { get; set; } = new MetaSlave[0];
+        public Position[] Entrances { get; set; } = new Position[0];
+    }
+
+    public class Position
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 
     class Wall
@@ -276,6 +300,11 @@ namespace Hivemind
             Raylib.DrawTexture(render.texture, X - (int)Mastermind.Eyes.X, Y - Height - (int)Mastermind.Eyes.Y, Color.WHITE);
             Raylib.DrawPixel(X - (int)Mastermind.Eyes.X, Y - (int)Mastermind.Eyes.Y, Color.BLUE);
             Render.EndDraw();
+        }
+
+        public void Kill()
+        {
+            Raylib.UnloadRenderTexture(render);
         }
     }
 
