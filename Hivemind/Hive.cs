@@ -184,6 +184,8 @@ namespace Hivemind
             Rectangle dangerZone = DefineDanger(goal);
             foreach (Slave slave in Slaves)
             {
+                if (!slave.Solid) continue;
+
                 float sXtl, sYtl;
                 sXtl = slave.Position.X - slave.Width / 2;
                 sYtl = slave.Position.Y - slave.Length / 2;
@@ -298,7 +300,7 @@ namespace Hivemind
         {
             Render.BeginDraw(Render.Layer.MID_GROUND, Y);
             Raylib.DrawTexture(render.texture, X - (int)Mastermind.Eyes.X, Y - Height - (int)Mastermind.Eyes.Y, Color.WHITE);
-            Raylib.DrawPixel(X - (int)Mastermind.Eyes.X, Y - (int)Mastermind.Eyes.Y, Color.BLUE);
+            // Raylib.DrawPixel(X - (int)Mastermind.Eyes.X, Y - (int)Mastermind.Eyes.Y, Color.BLUE);
             Render.EndDraw();
         }
 

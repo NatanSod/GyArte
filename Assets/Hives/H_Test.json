@@ -48,6 +48,21 @@
                 "Type" : 0,
                 "Extra" : "testDi"
             }
+        },
+        {
+            "Facing" : 1,
+            "Length" : 30,
+            "Width" : 30,
+            "Name" : null,
+            "X": 300, 
+            "Y": 150,
+            "Solid" : false,
+            "SpriteSheet" : "Test",
+            "Interaction" : 
+            {
+                "Type" : 1,
+                "Extra" : "Test2 0"
+            }
         }
     ],
     "Entrances":

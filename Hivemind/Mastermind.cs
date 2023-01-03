@@ -23,6 +23,8 @@ namespace Hivemind
         static public Slave? subject { get; private set; }
         static public Vector2 Eyes { get; private set; }
 
+        static List<string> hasRun = new List<string>();
+
         static Mastermind()
         {
             mouthpiece = new DialogueHandler();
@@ -140,6 +142,12 @@ namespace Hivemind
                     mouthpiece.Update(false, 0);
                     mouthpiece.Draw();
                     return Player.State.TALK;
+                case Interaction.iType.DOOR:
+                    string[] split = interacting.Interaction.Extra.Split(' ');
+                    string name = split[0];
+                    int entrance = int.Parse(split[1]);
+                    ConstructHive(name, entrance);
+                    return null;
                 default:
                     throw new Exception("Not ready for that kind of interaction yet.");
             }
@@ -154,9 +162,19 @@ namespace Hivemind
             switch (trigger.Interaction.Type)
             {
                 case Interaction.iType.TALK:
+                    // Do not do run trigger dialogue if it has already been run.
+                    if (hasRun.Contains(trigger.Interaction.Extra)) return null;
+
+                    hasRun.Add(trigger.Interaction.Extra);
                     subject = trigger;
                     mouthpiece.BeginDialogue(subject.Interaction.Extra);
                     return Player.State.TALK;
+                case Interaction.iType.DOOR:
+                    string[] split = trigger.Interaction.Extra.Split(' ');
+                    string name = split[0];
+                    int entrance = int.Parse(split[1]);
+                    ConstructHive(name, entrance);
+                    return null;
                 default:
                     throw new Exception("Not ready for that kind of interaction yet.");
             }

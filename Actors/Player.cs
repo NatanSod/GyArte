@@ -20,13 +20,14 @@ namespace Hivemind
 
         public int Width { get; private set; } = 30;
         public int Length { get; private set; } = 22;
-        int height = 36;
+        // int height = 36;
 
         public Vector2 Position { get; private set; } = new Vector2(Render.Width / 2, Render.Height / 2);
-        public Vector2 Facing { get; private set; }  = Vector2.UnitY;
+        public Vector2 Facing { get; private set; } = Vector2.UnitY;
         public float Time { get; private set; } = 0;
         Vector2 velocity = Vector2.Zero;
         float speed = 4;
+        int animationTime = 0;
         Trail trail;
         DialogueHandler dh { get => Mastermind.mouthpiece; }
 
@@ -123,11 +124,11 @@ namespace Hivemind
                 }
                 if (velocity != previousDirection)
                 {
-                    trail.MakeKey();
+                    // trail.MakeKey();
                 }
 
                 Position = goal;
-                
+
                 Time++;
             }
             else
@@ -175,73 +176,77 @@ namespace Hivemind
 
         public void Draw()
         {
-            Render.BeginDraw(Render.Layer.DEBUG, 0);
+            // Render.BeginDraw(Render.Layer.DEBUG, 0);
 
-            Vector2 previous = trail[0].Pos;
-            for (int i = 1; i < trail.Count; i++)
+            // Vector2 previous = trail[0].Pos;
+            // for (int i = 1; i < trail.Count; i++)
+            // {
+            //     Vector2 pos = trail[i].Pos;
+            //     Raylib.DrawLine((int)(previous.X - Mastermind.Eyes.X), (int)(previous.Y - Mastermind.Eyes.Y),
+            //                     (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y), Color.LIME);
+            //     Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
+            //     previous = pos;
+            // }
+            // Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
+            // Render.EndDraw();
+
+            // float thirdLength = trail.Lifespan / 3;
+            //// Draw them from the last one to the first one so that the first one is drawn on top.
+            // for (int i = 3; i >= 0; i--)
+            // {
+            //// Draw each character in a different colour.
+            // Color color = Color.RED;
+            // Color dark = Color.MAROON;
+            // switch (i)
+            // {
+            //     case 0:
+            //         color = Color.RED;
+            //         dark = Color.MAROON;
+            //         break;
+            //     case 1:
+            //         color = Color.GREEN;
+            //         dark = Color.DARKGREEN;
+            //         break;
+            //     case 2:
+            //         color = Color.BLUE;
+            //         dark = Color.DARKBLUE;
+            //         break;
+            //     default:
+            //         color = Color.YELLOW;
+            //         dark = Color.ORANGE;
+            //         break;
+            // }
+
+            // Vector2 pos = trail.GetPositionAt(i * thirdLength);
+            Render.BeginDraw(Render.Layer.MID_GROUND, (int)Position.Y);
+
+            // Raylib.DrawRectangle((int)(Position.X - Mastermind.Eyes.X) - (Width >> 1), (int)(Position.Y - Mastermind.Eyes.Y) - height + (Length >> 1), Width, height, color);
+
+            // Raylib.DrawRectangle((int)(Position.X - Mastermind.Eyes.X) - (Width >> 1), (int)(Position.Y - Mastermind.Eyes.Y) - height - (Length >> 1), Width, Length, dark);
+
+            // int direction = DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength));
+            int direction = DirectionIndexFromVector(Facing);
+
+            switch (state)
             {
-                Vector2 pos = trail[i].Pos;
-                Raylib.DrawLine((int)(previous.X - Mastermind.Eyes.X), (int)(previous.Y - Mastermind.Eyes.Y),
-                                (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y), Color.LIME);
-                Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
-                previous = pos;
+                case State.WALK:
+                    walk.Draw(direction, animationTime, (int)(Position.X - Mastermind.Eyes.X), (int)(Position.Y - Mastermind.Eyes.Y));
+                    animationTime = (animationTime + 1) % walk.Frames;
+                    break;
+                case State.STAND:
+                    animationTime = 0;
+                    stand.Draw(direction, 0, (int)(Position.X - Mastermind.Eyes.X), (int)(Position.Y - Mastermind.Eyes.Y));
+                    break;
+                case State.TALK:
+                    animationTime = 0;
+                    direction = DirectionIndexFromVector(Facing);
+                    stand.Draw(direction, 0, (int)(Position.X - Mastermind.Eyes.X), (int)(Position.Y - Mastermind.Eyes.Y));
+                    break;
+                default:
+                    throw new Exception("Not ready to display that state yet.");
             }
-            Raylib.DrawRectangle((int)(previous.X - Mastermind.Eyes.X) - 2, (int)(previous.Y - Mastermind.Eyes.Y) - 2, 4, 4, Color.LIME);
             Render.EndDraw();
-
-            float thirdLength = trail.Lifespan / 3;
-            // Draw them from the last one to the first one so that the first one is drawn on top.
-            for (int i = 3; i >= 0; i--)
-            {
-                // Draw each character in a different colour.
-                Color color;
-                Color dark;
-                switch (i)
-                {
-                    case 0:
-                        color = Color.RED;
-                        dark = Color.MAROON;
-                        break;
-                    case 1:
-                        color = Color.GREEN;
-                        dark = Color.DARKGREEN;
-                        break;
-                    case 2:
-                        color = Color.BLUE;
-                        dark = Color.DARKBLUE;
-                        break;
-                    default:
-                        color = Color.YELLOW;
-                        dark = Color.ORANGE;
-                        break;
-                }
-
-                Vector2 pos = trail.GetPositionAt(i * thirdLength);
-                Render.BeginDraw(Render.Layer.MID_GROUND, (int)pos.Y);
-
-                Raylib.DrawRectangle((int)(pos.X - Mastermind.Eyes.X) - (Width >> 1), (int)(pos.Y - Mastermind.Eyes.Y) - height + (Length >> 1), Width, height, color);
-
-                Raylib.DrawRectangle((int)(pos.X - Mastermind.Eyes.X) - (Width >> 1), (int)(pos.Y - Mastermind.Eyes.Y) - height - (Length >> 1), Width, Length, dark);
-
-                int direction = DirectionIndexFromVector(trail.GetDirectionAt(i * thirdLength));
-
-                switch (state)
-                {
-                    case State.WALK:
-                        walk.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
-                        break;
-                    case State.STAND:
-                        stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
-                        break;
-                    case State.TALK:
-                        direction = DirectionIndexFromVector(Facing);
-                        stand.Draw(direction, 0, (int)(pos.X - Mastermind.Eyes.X), (int)(pos.Y - Mastermind.Eyes.Y));
-                        break;
-                    default:
-                        throw new Exception("Not ready to display that state yet.");
-                }
-                Render.EndDraw();
-            }
+            // }
         }
 
         // Facing direction charts.

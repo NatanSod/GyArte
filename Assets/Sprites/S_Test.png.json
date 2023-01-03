@@ -7,6 +7,7 @@
         "Height" : 30,
         "OriginX" : 15,
         "OriginY" : 15,
+        "Speed" : 1,
         "StartX" : 0,
         "StartY" : 0
     },
@@ -18,6 +19,7 @@
         "Height" : 30,
         "OriginX" : 15,
         "OriginY" : 15,
+        "Speed" : 1,
         "StartX" : 30,
         "StartY" : 0
     }

@@ -57,6 +57,8 @@ namespace GyArte
         public int OriginX { get; private set; } // X and Y origin
         public int OriginY { get; private set; }
 
+        public int Speed { get; private set; } // How many frames it takes to move to the next frame of the animation.
+
         public int Facings { get => frames.Length; }
         public int Frames { get => frames[0].Length; }
 
@@ -69,6 +71,7 @@ namespace GyArte
             Width = meta.Width;
             OriginX = meta.OriginX;
             OriginY = meta.OriginY;
+            Speed = meta.Speed;
 
             frames = new RenderTexture2D[meta.Facings][];
             for (int dir = 0; dir < meta.Facings; dir++)
@@ -88,7 +91,7 @@ namespace GyArte
 
         public void Draw(int direction, int frame, int x, int y)
         {
-            Raylib.DrawTexture(frames[direction][frame].texture, x - OriginX, y - OriginY, Color.WHITE);
+            Raylib.DrawTexture(frames[direction][(frame / Speed)].texture, x - OriginX, y - OriginY, Color.WHITE);
         }
 
         public Texture2D GetTexture(int direction, int frame)
@@ -130,6 +133,7 @@ namespace GyArte
         public int Height { get; set; }
         public int OriginX { get; set; } // X and Y origin
         public int OriginY { get; set; }
+        public int Speed { get; set; } // How many frames it takes to move to the next frame of the animation.
         public int StartX { get; set; } // X and Y start
         public int StartY { get; set; }
     }

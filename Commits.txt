@@ -85,3 +85,10 @@ I changed how it decides which walk sprite to show when moving diagonally. Befor
 10 - Switch Hive
 Made it unload the textures for the previous hive before loading the new ones. The Hive now also contain a list of "Entrances", which is just a list of the positions the player will start at, meaning that every door into a room won't place the player in the same spot. It will create a new Player at that position because I did not want to deal with resetting the trail stuff. This means some data needs to be stored externally.
 Next step: Saving & Loading. (Dear god help me.)
+
+
+11 - Cutbacks and Finished code
+Due to limited time, the size of the party has been changed from 4 to 1 (so a lot of code, like the Trail class, has been for nothing, but oh well). And I have decided that the game will be so short that it doesn't need saving. 
+I made the door type interaction work.
+Triggers that start dialogue only trigger once.
+While there is so much more I want to add, I feel this is where the programming needs to end, I have made everything that is necessary, if the programming is going to stop anywhere it's here. It's time to actually make something out of it.
