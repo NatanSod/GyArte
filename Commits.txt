@@ -92,3 +92,9 @@ Due to limited time, the size of the party has been changed from 4 to 1 (so a lo
 I made the door type interaction work.
 Triggers that start dialogue only trigger once.
 While there is so much more I want to add, I feel this is where the programming needs to end, I have made everything that is necessary, if the programming is going to stop anywhere it's here. It's time to actually make something out of it.
+
+
+12 - Dialogue commands
+After having taken a break from coding and instead thinking about what I need to do, I made some changes to things. First, I made it so that changing rooms is no longer done through the interaction being labeled as a door. Everything is now dialogue, but some dialogue does not contain actual words or text but instead simply contains dialogue commands. Changing the room is now a dialogue command. The ability so set a slave's solidity is also a dialogue command. I've also made it so that dialogues that don't include text or options instantly finnish.
+In order to make the commands specific to this program without desecrating TalkBox with outside influence, I made CommandManager abstract and made it so that the code that uses TalkBox provides a CommandManager. This also allowed me to make TalkBox itself be able to support commands that execute over a period of time, but I currently do not have any code to do so.
+There was also a small fix made to variables and I also made it so that when a new hive is constructed it moves the player instead of creating a new one because reasons.

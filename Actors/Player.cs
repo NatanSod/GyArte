@@ -28,7 +28,7 @@ namespace Hivemind
         Vector2 velocity = Vector2.Zero;
         float speed = 4;
         int animationTime = 0;
-        Trail trail;
+        // Trail trail;
         DialogueHandler dh { get => Mastermind.mouthpiece; }
 
         public Player()
@@ -37,7 +37,7 @@ namespace Hivemind
             stand = spriteSheet.GetAnimation("stand");
             walk = spriteSheet.GetAnimation("walk");
 
-            trail = new Trail(this, 25 * 4 / speed);
+            // trail = new Trail(this, 25 * 4 / speed);
         }
 
         public Player(Vector2 position)
@@ -47,7 +47,13 @@ namespace Hivemind
             stand = spriteSheet.GetAnimation("stand");
             walk = spriteSheet.GetAnimation("walk");
 
-            trail = new Trail(this, 25 * 4 / speed);
+            // trail = new Trail(this, 25 * 4 / speed);
+        }
+
+        public void SetPosition(Vector2 position, Vector2 facing)
+        {
+            Position = position;
+            Facing = facing;
         }
 
         SpriteSheet spriteSheet;

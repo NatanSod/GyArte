@@ -1,0 +1,5 @@
+title: Door2
+position: 315,362
+---
+<<change_room "Test" 0>>
+===

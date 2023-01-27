@@ -7,6 +7,11 @@ using System.Reflection;
 
 namespace TalkBox
 {
+    abstract class CommandManager
+    {
+        abstract public void RunFunction(DialogueRunner runner, string function, Variable[] args);
+    }
+    /*
     // Most of the code here is stolen from "Yarn Spinner" (https://github.com/YarnSpinnerTool)
     // Specifically, these two directories: https://github.com/YarnSpinnerTool/YarnSpinner and https://github.com/YarnSpinnerTool/YarnSpinner-Unity
     // I did however change a few things to make it work outside of Unity, and I need to change a few more.
@@ -752,4 +757,5 @@ namespace TalkBox
             return $"$Yarn.Internal.Visiting.{nodeName}";
         }
     }
+    */
 }

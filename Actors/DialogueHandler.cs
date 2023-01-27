@@ -13,7 +13,7 @@ namespace Hivemind
         // TODO: Make a function that ends dialogue in a more elegant and official fashion.
         // TODO: If I've gone insane, make it possible to select options with the mouse.
         // TODO: Make it get the command manager from Mastermind.
-        CommandManager cm = new CommandManager();
+        // CommandManager cm;
         DialogueRunner dr;
         DialogueDisplay dd;
         bool auto = false;
@@ -174,15 +174,12 @@ namespace Hivemind
             }
         }
 
-        public void BeginDialogue(string dialogueName)
+        public void BeginDialogue(DialogueRunner dialogueRunner)
         {
-            // Would prefer if two dialogues wouldn't start at the same time.
-            if (!Running)
-            {
-                // Get the dialogue and display the first line.
-                dr = new DialogueRunner(this, dialogueName);
-                dr.Start();
-            }
+            // Get the dialogue and display the first line.
+            dr = dialogueRunner;
+            dr.Start();
+            
         }
 
         private void NextLine() => dr.NextLine();

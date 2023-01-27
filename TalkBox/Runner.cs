@@ -10,6 +10,7 @@ namespace TalkBox
         // When getting all options for choices, "scout ahead" for options with equal level and stop when a line with lower level or equal level without an option is found.
         int line = 0;
         int level = 0;
+        bool gettingLine = false;
         bool waitingOptions = false;
         bool waitingCommand = false;
         string nodeName;
@@ -31,9 +32,9 @@ namespace TalkBox
 
         private List<Mode> hierarchy = new List<Mode>();
 
-        public DialogueRunner(ILineOutput output, string dialogueName, string node = "Start")
+        public DialogueRunner(ILineOutput output, CommandManager commandManager, string dialogueName, string node = "Start")
         {
-            cm = new CommandManager();
+            cm = commandManager;
             lineOutput = output;
             nodes = Parser.Make(dialogueName);
             nodeName = node;
@@ -185,9 +186,21 @@ namespace TalkBox
             }
         }
 
-        public void NextLine() => lineGetter.MoveNext();
+        public void NextLine() 
+        {
+            // This is to make sure that two lines won't be gotten at the same time.
+            if (gettingLine) return;
 
-        public void FinnishCommand() { waitingCommand = false; lineGetter.MoveNext(); }
+            gettingLine = true;
+            lineGetter.MoveNext();
+            gettingLine = false;
+        }
+
+        public void FinnishCommand() 
+        { 
+            waitingCommand = false; 
+            lineGetter.MoveNext(); 
+        }
 
         private IEnumerator GetLineE()
         {
@@ -251,8 +264,8 @@ namespace TalkBox
                         }
                         else
                         {
-                            cLine.Execute(cm);
                             waitingCommand = true;
+                            cLine.Execute(cm, this);
                             while (waitingCommand) yield return null; // Don't do anything while waiting for an async command to finnish first.
                             break;
                         }

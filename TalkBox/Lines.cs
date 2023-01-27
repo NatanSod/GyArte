@@ -402,7 +402,7 @@ namespace TalkBox
             a = Regex.Split(arguments, ArgumentPattern);
         }
 
-        public void Execute(CommandManager commandManager)
+        public void Execute(CommandManager commandManager, DialogueRunner runner)
         {
             // The async commands need to check the mode of commandManager in case it's skipping or similar.
 
@@ -445,6 +445,7 @@ namespace TalkBox
                 }
 
                 Variables.Define(name, value);
+                runner.FinnishCommand();
             }
             else if (c == "set")
             {
@@ -476,6 +477,7 @@ namespace TalkBox
                     }
                 }
                 Variables.Set(name, value);
+                runner.FinnishCommand();
             }
             else
             {
@@ -486,6 +488,7 @@ namespace TalkBox
                 {
                     arguments[i] = Variables.Calculate(a[i]);
                 }
+                commandManager.RunFunction(runner, c, arguments);
 
                 // commandManager.Add(c, t, arguments);
             }

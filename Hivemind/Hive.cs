@@ -21,7 +21,7 @@ namespace Hivemind
         public Tile[] Layout { get; private set; }
         public Wall[] Walls { get; private set; }
         public Slave[] Slaves { get; private set; }
-        public Vector2[] Entrances { get; private set; }
+        public Vector2[][] Entrances { get; private set; }
 
         RenderTexture2D background;
         TileSet tileSet;
@@ -74,10 +74,13 @@ namespace Hivemind
                 Slaves[i] = new Slave(meta.Slaves[i]);
             }
 
-            Entrances = new Vector2[meta.Entrances.Length];
-            for (int i = 0; i < Entrances.Length; i ++)
+            Entrances = new Vector2[2][];
+            Entrances[0] = new Vector2[meta.Entrances.Length];
+            Entrances[1] = new Vector2[meta.Entrances.Length];
+            for (int i = 0; i < meta.Entrances.Length; i ++)
             {
-                Entrances[i] = new Vector2(meta.Entrances[i].X + .5f, meta.Entrances[i].Y + .5f) * new Vector2(tileSet.TileWidth, tileSet.TileHeight);
+                Entrances[0][i] = new Vector2(meta.Entrances[i].X + .5f, meta.Entrances[i].Y + .5f) * new Vector2(tileSet.TileWidth, tileSet.TileHeight);
+                Entrances[1][i] = new Vector2(meta.Entrances[i].FaceX, meta.Entrances[i].FaceY);
             }
         }
 
@@ -237,8 +240,9 @@ namespace Hivemind
             return null;
         }
 
-        public Slave? Trigger(int x, int y)
+        public List<Slave> Trigger(int x, int y)
         {
+            List<Slave> triggers = new List<Slave>();
             foreach (Slave slave in Slaves)
             {
                 if (slave.Interaction == null || slave.Solid) continue;
@@ -249,10 +253,10 @@ namespace Hivemind
 
                 if (x < right && x > left && y < down && y > up)
                 {
-                    return slave;
+                    triggers.Add(slave);
                 }
             }
-            return null;
+            return triggers;
         }
     }
 
@@ -274,6 +278,8 @@ namespace Hivemind
     {
         public int X { get; set; }
         public int Y { get; set; }
+        public int FaceX { get; set; }
+        public int FaceY { get; set; }
     }
 
     class Wall

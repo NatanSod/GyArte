@@ -43,11 +43,8 @@
             "Y": 150,
             "Solid" : true,
             "SpriteSheet" : "Test",
-            "Interaction" : 
-            {
-                "Type" : 0,
-                "Extra" : "testDi"
-            }
+            "Interaction" : "testDi"
+            
         },
         {
             "Facing" : 1,
@@ -58,15 +55,12 @@
             "Y": 150,
             "Solid" : false,
             "SpriteSheet" : "Test",
-            "Interaction" : 
-            {
-                "Type" : 1,
-                "Extra" : "Test 0"
-            }
+            "Interaction" : "Door2"
+            
         }
     ],
     "Entrances":
     [
-        { "X": 4, "Y": 4}
+        { "X": 4, "Y": 4, "FaceX": 0, "FaceY": 1}
     ]
 }

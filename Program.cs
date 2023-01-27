@@ -27,13 +27,7 @@ namespace GyArte
                 Raylib.DrawFPS(50, 40);
                 Render.EndDraw();
 
-
                 Mastermind.Contemplate();
-                if (Raylib.IsKeyPressed(KeyboardKey.KEY_C))
-                {
-                    Mastermind.ConstructHive("Test2", 0);
-                }
-
 
                 Render.EndFrame();
             }

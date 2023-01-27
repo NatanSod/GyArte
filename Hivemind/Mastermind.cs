@@ -17,21 +17,23 @@ namespace Hivemind
         static private List<SpriteSheet> spriteSheets = new List<SpriteSheet>();
 
         static public DialogueHandler mouthpiece { get; private set; }
+        static public CommandManager commander { get; private set; }
         static public DialogueRunner lore { get; private set; }
         static public Player victim { get; private set; }
         static public Hive currentHive { get; private set; }
         static public Slave? subject { get; private set; }
         static public Vector2 Eyes { get; private set; }
 
-        static List<string> hasRun = new List<string>();
+        static List<Slave> hasRun = new List<Slave>();
 
         static Mastermind()
         {
             mouthpiece = new DialogueHandler();
-            lore = new DialogueRunner(mouthpiece, "testDi");
+            commander = new Commander();
+            lore = new DialogueRunner(mouthpiece, commander, @"Assets\Dialogue\testDi", "testDi");
             victim = new Player();
             currentHive = new Hive("Test");
-            
+
             float x = victim.Position.X - Render.Width;
             float y = victim.Position.Y - Render.Height;
 
@@ -85,8 +87,9 @@ namespace Hivemind
             // Add a bit more fanfare maybe.
             currentHive.Deconstruct();
             currentHive = new Hive(name);
-            Vector2 start = currentHive.Entrances[position];
-            victim = new Player(start);
+            Vector2 start = currentHive.Entrances[0][position];
+            Vector2 facing = currentHive.Entrances[1][position];
+            victim.SetPosition(start, facing);
         }
 
         /// <summary>
@@ -133,51 +136,49 @@ namespace Hivemind
             Slave? interacting = currentHive.Interact(x, y);
 
             if (interacting?.Interaction == null) return null;
-
-            switch (interacting.Interaction.Type)
+            subject = interacting;
+            lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{interacting.Interaction}", interacting.Interaction);
+            mouthpiece.BeginDialogue(lore);
+            if (mouthpiece.Running)
             {
-                case Interaction.iType.TALK:
-                    subject = interacting;
-                    mouthpiece.BeginDialogue(subject.Interaction.Extra);
-                    mouthpiece.Update(false, 0);
-                    mouthpiece.Draw();
-                    return Player.State.TALK;
-                case Interaction.iType.DOOR:
-                    string[] split = interacting.Interaction.Extra.Split(' ');
-                    string name = split[0];
-                    int entrance = int.Parse(split[1]);
-                    ConstructHive(name, entrance);
-                    return null;
-                default:
-                    throw new Exception("Not ready for that kind of interaction yet.");
+                mouthpiece.Update(false, 0);
+                mouthpiece.Draw();
+                return Player.State.TALK;
             }
+            return null;
         }
 
         static public Player.State? Trigger(int x, int y)
         {
-            Slave? trigger = currentHive.Trigger(x, y);
+            List<Slave> triggers = currentHive.Trigger(x, y);
 
-            if (trigger?.Interaction == null) return null;
-
-            switch (trigger.Interaction.Type)
+            for (int i = 0; i < hasRun.Count; i++)
             {
-                case Interaction.iType.TALK:
-                    // Do not do run trigger dialogue if it has already been run.
-                    if (hasRun.Contains(trigger.Interaction.Extra)) return null;
-
-                    hasRun.Add(trigger.Interaction.Extra);
-                    subject = trigger;
-                    mouthpiece.BeginDialogue(subject.Interaction.Extra);
-                    return Player.State.TALK;
-                case Interaction.iType.DOOR:
-                    string[] split = trigger.Interaction.Extra.Split(' ');
-                    string name = split[0];
-                    int entrance = int.Parse(split[1]);
-                    ConstructHive(name, entrance);
-                    return null;
-                default:
-                    throw new Exception("Not ready for that kind of interaction yet.");
+                if (!triggers.Remove(hasRun[i]))
+                {
+                    hasRun.RemoveAt(i);
+                    i--;
+                }
             }
+
+            foreach (Slave trigger in triggers)
+            {
+                if (trigger.Interaction == null) continue;
+
+                // Do not do run trigger dialogue if it has already been run.
+                if (hasRun.Contains(trigger)) return null;
+
+                hasRun.Add(trigger);
+                subject = trigger;
+                lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{trigger.Interaction}", trigger.Interaction);
+                mouthpiece.BeginDialogue(lore);
+
+                if (mouthpiece.Running)
+                {
+                    return Player.State.TALK;
+                }
+            }
+            return null;
         }
 
         static public SpriteSheet LoadSheet(string name)

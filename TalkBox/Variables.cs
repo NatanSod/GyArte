@@ -133,9 +133,18 @@ namespace TalkBox
                     {
                         throw new InvalidOperationException("That operator is not valid for strings");
                     }
-                    r += v.GetValue<string>();
+                    string a = v.GetValue<string>();
+                    Match m = Regex.Match(a, "^\"(.*?)\"$");
+                    if (m.Success)
+                    {
+                        r += m.Groups[1].Value;
+                    }
+                    else
+                    {
+                        r += a;
+                    }
                 }
-                return new Variable($"\"{r}\"", Variable.vType.String);
+                return new Variable($"{r}", Variable.vType.String);
             }
             else if (statementType == Variable.vType.Bool)
             {

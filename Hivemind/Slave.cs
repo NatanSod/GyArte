@@ -4,7 +4,7 @@ using GyArte;
 namespace Hivemind
 {
     // The NPC and prop class.
-    class Slave : TalkBox.ISearchable
+    class Slave // : TalkBox.ISearchable
     {
         public string Name { get; private set; }
         public Vector2 Position { get; private set; }
@@ -17,7 +17,7 @@ namespace Hivemind
 
         public SpriteSheet SpriteSheet { get; private set; }
         Animation stand;
-        public Interaction? Interaction { get; private set; }
+        public string? Interaction { get; private set; }
 
         public Slave(MetaSlave meta)
         {
@@ -33,10 +33,7 @@ namespace Hivemind
             SpriteSheet = Mastermind.LoadSheet(meta.SpriteSheet);
             stand = SpriteSheet.GetAnimation("stand");
 
-            if (meta.Interaction != null)
-            {
-                Interaction = new Interaction(meta.Interaction);
-            }
+            Interaction = meta.Interaction;
         }
 
         public void Draw()
@@ -77,6 +74,11 @@ namespace Hivemind
             }
             throw new ArgumentException("That vector does not include a direction.");
         }
+
+        public void SetSolid(bool value)
+        {
+            Solid = value;
+        }
     }
 
     class MetaSlave
@@ -89,29 +91,6 @@ namespace Hivemind
         public int Length { get; set; }
         public bool Solid { get; set; }
         public string SpriteSheet { get; set; } = "";
-        public MetaInteraction? Interaction { get; set; }
-    }
-
-    class Interaction
-    {
-        public enum iType
-        {
-            TALK,
-            DOOR,
-        }
-        public iType Type { get; private set; }
-        public string Extra { get; private set; }
-
-        public Interaction(MetaInteraction meta)
-        {
-            Extra = meta.Extra;
-            Type = meta.Type;
-        }
-    }
-
-    class MetaInteraction
-    {
-        public Interaction.iType Type { get; set; }
-        public string Extra { get; set; } = "";
+        public string? Interaction { get; set; }
     }
 }
