@@ -20,7 +20,7 @@ namespace GyArte
         /// </summary>
         public static Tile Empty { get => empty; }
 
-        static TileSet ()
+        static TileSet()
         {
             empty = new Tile(Raylib.LoadRenderTexture(4, 4), new MetaTile() { Solid = true });
             Raylib.BeginTextureMode(empty.Render);
@@ -59,13 +59,13 @@ namespace GyArte
             }
         }
 
-        public Tile GetTile(int? id)
+        public Tile GetTile(int id)
         {
-            if (id == null || id < 0 || id >= tiles.Length)
+            if (id < 0 || id >= tiles.Length)
             {
                 return Empty;
             }
-            return tiles[(int)id];
+            return tiles[id];
         }
 
         /// <summary>
@@ -76,26 +76,26 @@ namespace GyArte
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        public Tile[] Print(int?[] layout, int width, int height)
+        public Tile[,] Print(int[][] layout, int width, int height)
         {
-            Tile[] result = new Tile[layout.Length];
+            // For all arrays here, it's y then x.
+            Tile[,] result = new Tile[height, width];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int index = y * width + x;
-                    int? id = layout[index];
-                    
-                    if (id == null)
+                    // If there isn't enough layout data then the remaining tiles are empty.
+                    // If it's less than 0 then it's the empty tile.
+                    if (layout.Length <= y || layout[y].Length <= x || layout[y][x] < 0 || layout[y][x] >= tiles.Length)
                     {
-                        result[index] = Empty;
+                        result[y, x] = Empty;
                         continue;
                     }
 
-                    Tile tile = tiles[(int)id];
+                    Tile tile = tiles[layout[y][x]];
                     Raylib.DrawTexturePro(tile.Render.texture, new Rectangle(0, 0, TileWidth, -TileHeight),
                                           new Rectangle(x * TileWidth, (height - y - 1) * TileHeight, TileWidth, TileHeight), Vector2.Zero, 0, Color.WHITE);
-                    result[index] = tile;
+                    result[y, x] = tile;
                 }
             }
             return result;

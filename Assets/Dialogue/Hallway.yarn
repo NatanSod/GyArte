@@ -1,0 +1,22 @@
+title: HallwayBrDoor
+position: 287,401
+---
+<<if $Done>>
+    <<fade_out>>
+    <<change_room "Bedroom" 1>>
+    <<fade_in>>
+<<else>>
+    Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+<<endif>>
+===
+title: HallwayTDoor
+position: 287,401
+---
+<<if $Done>>
+    Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+<<else>>
+    <<fade_out>>
+    <<change_room "Pub" 0>>
+    <<fade_in>>
+<<endif>>
+===

@@ -1,40 +1,67 @@
 {
-    "Commands": [
-      {
-        "YarnName": "change_room",
-        "Language": "csharp",
-        "Documentation": "Go to a different room",
-        "Parameters": [
-          {
-            "Name": "room",
-            "Type": "String",
-            "Documentation": "The room to go to"
-          },
-          {
-            "Name": "door",
-            "Type": "float",
-            "Documentation": "The door to go to"
-          }
-        ]
-      },
-      {
-        "YarnName": "set_solid",
-        "Language": "csharp",
-        "Parameters": [
-            {
-                "Name": "name",
-                "Type": "String",
-                "Documentation": "The name of the object"
-            },
-            {
-                "Name": "value",
-                "Type": "Bool",
-                "Documentation": "The value to set it to"
-            }
-        ]
-
-      }
-    ],
-    "Functions": [
-    ]
-  }
+  "Commands": [
+    {
+      "YarnName": "change_room",
+      "Language": "csharp",
+      "Documentation": "Go to a different room",
+      "Parameters": [
+        {
+          "Name": "room",
+          "Type": "String",
+          "Documentation": "The room to go to"
+        },
+        {
+          "Name": "door",
+          "Type": "float",
+          "Documentation": "The door to go to"
+        }
+      ]
+    },
+    {
+      "YarnName": "set_solid",
+      "Language": "csharp",
+      "Parameters": 
+      [
+        {
+          "Name": "name",
+          "Type": "String",
+          "Documentation": "The name of the object"
+        },
+        {
+          "Name": "value",
+          "Type": "Bool",
+          "Documentation": "The value to set it to"
+        }
+      ]
+    },
+    {
+      "YarnName": "fade_in",
+      "Language": "csharp",
+      "Parameters": []
+    },
+    {
+      "YarnName": "fade_out",
+      "Language": "csharp",
+      "Parameters": []
+    },
+    {
+      "YarnName": "face",
+      "Language": "csharp",
+      "Parameters": 
+      [
+        {
+          "Name": "facer",
+          "Type": "String",
+          "Documentation": "The object who's facing direction will be changed"
+        },
+        {
+          "Name": "direction",
+          "Type": "Any",
+          "Documentation": "A facing index or an object to face towards"
+        }
+      ]
+    }
+  ],
+  "Functions": [
+  ]
+}

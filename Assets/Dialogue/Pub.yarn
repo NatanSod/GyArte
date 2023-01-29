@@ -1,0 +1,68 @@
+title: PubExit
+position: 479,-17
+---
+<<if $Package>>
+    Nohkan: Jag har varit ute lagom mycket idag.
+<<elseif $Mission>>
+    <<fade_out>>
+    <<change_room "TheVoid" 0>>
+    En kort promenad senare...
+    <<change_room "Store" 0>>
+    <<fade_in>>
+<<else>>
+    <<face "Boss" 0>>
+    Telbeth: Hörru! Nohkan! 
+    Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<face "Boss" 1>>
+<<endif>>
+===
+title: PubHDoor
+position: -139,-7
+---
+<<if $Done>>
+    <<fade_out>>
+    <<change_room "Hallway" 1>>
+    <<fade_in>>
+<<elseif $Package>>
+    Nohkan: Jag tänker inte ta med mig Telbeths beställning till mitt rum.
+<<elseif $Mission>>
+    <<face "Boss" 2>>
+    Telbeth: Du kan gå tillbaka till ditt rum när du är klar.
+    <<face "Boss" 1>>
+<<else>>
+    <<face "Boss" 2>>
+    Telbeth: Hörru! Nohkan! 
+    Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<face "Boss" 1>>
+<<endif>>
+===
+title: PubBoss
+position: 143,-4
+---
+<<face "Boss" "Player">>
+<<if $Done>>
+    Nohkan: Du kommer väll inte ropa på mig igen?
+    Telbeth: Nej, det kommer jag inte.
+    Nohkan: Bra.
+<<elseif $Package>>
+    Nohkan: Jag har allt.
+    Telbeth: Tack så mycket.
+    Telbeth: Du kan gå upp till ditt rum och göra det du gör där.
+    Nohkan: Äntligen. Jag kan till slut läsa min bok.
+    <<set $Done = true>>
+<<elseif $Mission>>
+    Nohkan: Jag vet att du hört det minst 50 gågner men jag kom precis på att- #Last
+    Telbeth: Vi kan prata mer om det när du kommer tillbaka.
+<<else>>
+    Nohkan: Du ville något?
+    Telbeth: Ja. Jag behöver köpa några saker men är upptagen här.
+    Telbeth: Skulle du kunna gå och ta hand om det?
+    Nohkan: Igen?
+    Nohkan: Det här skulle bli så mycket lättare ifall vi bara- #Last
+    Telbeth: Jag vet.
+    Nohkan: Men om- #Last
+    Telbeth: Här är listan. Lite frisk luft kommer göra dig gott.
+    <<set $Mission = true>>
+<<endif>>
+<<face "Boss" 1>>
+===

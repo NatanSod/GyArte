@@ -1,0 +1,59 @@
+title: Start
+position: 360,245
+---
+<<declare $ExitRoom = false>>
+<<declare $Mission = false>>
+<<declare $Package = false>>
+<<declare $Done = false>>
+Tryck på mellanslag för att fortsätta.
+<<change_room "Bedroom" 0>>
+<<fade_in>>
+Nohkan: Äntligen, lite fritid.
+Nohkan: Men vad ska jag göra med den? #Last
+-> Läs boken
+-> Läs boken
+-> Läs boken
+Nohkan: Det är inte ens en fråga.
+Nohkan: Den har legat oläst på mitt skrivbord alldeles för länge.
+===
+title: BedroomDoor
+position: 252,410
+---
+<<if $Done>>
+    Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+<<elseif $ExitRoom>>
+    <<fade_out>>
+    <<change_room "Hallway" 0>>
+    <<fade_in>>
+<<else>>
+    Nohkan: Jag antar att jag kan läsa utomhus. 
+    Nohkan: Men jag behöver fortfarande ta med mig boken.
+<<endif>>
+===
+title: BedroomBook
+position: 494,436
+---
+<<if $Done>>
+    Nohkan: Efter en lång dag så kan jag äntligen läsa min bok.
+    Nohkan: ...
+    Nohkan: Men nu kan jag inte sluta tänka på imorgon...
+    Nohkan: ...
+    Nohkan: Det blir trevligt att bara vara vi tre igen.
+    Nohkan: Jag, Vamemir och Rirma. Precis som förr.
+    Nohkan: Hoppas bara att Rirma inte hittat på något dumt.
+    <<fade_out>>
+    <<change_room "TheVoid" 0>>
+    Det här är slutet på denna del av studien.
+    Var snäll och informera mig (personen som bad dig spela detta spel) att du är klar ifall jag inte redan vet.
+<<elseif $ExitRoom>>
+    Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+<<else>>
+    Nohkan: Nu är det dags att läsa!
+    Telbeth: Hej! Nohkan!
+    Telbeth: Kom ner hit. Jag behöver din hjälp.
+    Nohkan: Visste att det va för bra för att vara sant.
+    Nohkan: Jag borde gå och kolla vad Telbeth vill.
+    Nohkan: Han kan ju sparka ut mig om jag inte kommer.
+    <<set $ExitRoom = true>>
+<<endif>>
+===

@@ -18,10 +18,10 @@ namespace Hivemind
         public int ActualLength { get; private set; }
 
         // These are arrays and not lists because I prefer them when the items contained in them never change.
-        public Tile[] Layout { get; private set; }
+        public Tile[,] Layout { get; private set; }
         public Wall[] Walls { get; private set; }
         public Slave[] Slaves { get; private set; }
-        public Vector2[][] Entrances { get; private set; }
+        public Vector2[,] Entrances { get; private set; }
 
         RenderTexture2D background;
         TileSet tileSet;
@@ -74,13 +74,11 @@ namespace Hivemind
                 Slaves[i] = new Slave(meta.Slaves[i]);
             }
 
-            Entrances = new Vector2[2][];
-            Entrances[0] = new Vector2[meta.Entrances.Length];
-            Entrances[1] = new Vector2[meta.Entrances.Length];
+            Entrances = new Vector2[2, meta.Entrances.Length];
             for (int i = 0; i < meta.Entrances.Length; i ++)
             {
-                Entrances[0][i] = new Vector2(meta.Entrances[i].X + .5f, meta.Entrances[i].Y + .5f) * new Vector2(tileSet.TileWidth, tileSet.TileHeight);
-                Entrances[1][i] = new Vector2(meta.Entrances[i].FaceX, meta.Entrances[i].FaceY);
+                Entrances[0, i] = new Vector2(meta.Entrances[i].X + .5f, meta.Entrances[i].Y + .5f) * new Vector2(tileSet.TileWidth, tileSet.TileHeight);
+                Entrances[1, i] = new Vector2(meta.Entrances[i].FaceX, meta.Entrances[i].FaceY);
             }
         }
 
@@ -96,11 +94,12 @@ namespace Hivemind
 
         public void Update()
         {
-            // Remember to draw the background, foreground, and walls as well.
+            // The background, usually the floor.
             Render.BeginDraw(Render.Layer.BACKGROUND, 0);
             Raylib.DrawTexture(background.texture, -(int)Mastermind.Eyes.X, -(int)Mastermind.Eyes.Y, Color.WHITE);
             Render.EndDraw();
 
+            // Walls and slaves are in their own layers and positions. This is easier.
             foreach (Wall wall in Walls)
             {
                 wall.Draw();
@@ -132,7 +131,7 @@ namespace Hivemind
             {
                 return TileSet.Empty;
             }
-            return Layout[y * Width + x];
+            return Layout[y, x];
         }
 
         public Vector2? CheckCollision(Vector2 goal)
@@ -266,7 +265,7 @@ namespace Hivemind
         public int Length { get; set; }
 
         public string TileSet { get; set; } = "";
-        public int?[] Layout { get; set; } = new int?[0];
+        public int[][] Layout { get; set; } = new int[0][];
 
         public MetaWall[] Walls { get; set; } = new MetaWall[0];
 
@@ -322,6 +321,6 @@ namespace Hivemind
         public int Y { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
-        public int?[] Layout { get; set; } = new int?[0];
+        public int[][] Layout { get; set; } = new int[0][];
     }
 }

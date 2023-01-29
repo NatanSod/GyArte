@@ -20,6 +20,7 @@ namespace Hivemind
         List<int> choices = new List<int>();
         int choice = 0;
         public bool Running { get; private set; }
+        bool displaying = false;
 
         void ILineOutput.Start()
         {
@@ -29,6 +30,7 @@ namespace Hivemind
 
         void ILineOutput.DisplayLine(TLine line)
         {
+            displaying = true;
             if (choices.Count != 0)
             {
                 choice = 0;
@@ -42,6 +44,7 @@ namespace Hivemind
 
         void ILineOutput.DisplayOptions(TLine[] options)
         {
+            displaying = true;
             if (choices.Count != 0)
             {
                 choice = 0;
@@ -161,7 +164,7 @@ namespace Hivemind
         public void Draw()
         {
             // There is no dialogue running. Therefore you should stop.
-            if (dr == null) return;
+            if (dr == null || !displaying) return;
 
             // Display the dialogue.
             if (choices.Count == 0)
@@ -180,6 +183,11 @@ namespace Hivemind
             dr = dialogueRunner;
             dr.Start();
             
+        }
+
+        public void StopDisplaying()
+        {
+            displaying = false;
         }
 
         private void NextLine() => dr.NextLine();

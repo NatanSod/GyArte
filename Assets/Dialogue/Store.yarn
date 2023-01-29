@@ -1,0 +1,82 @@
+title: StoreExit
+position: 287,212
+---
+<<if $Package>>
+    <<fade_out>>
+    <<change_room "TheVoid" 0>>
+    En kort promenad senare...
+    <<change_room "Pub" 1>>
+    <<fade_in>>
+<<else>>
+    Nohkan: Om jag går hem nu skulle allt vara i onödan.
+<<endif>>
+===
+title: StoreFriend
+position: 287,222
+---
+<<if $Package>>
+    Rirma: Om det hjälper dig slappna av, det är förmodligen inget farligt.
+    Nohkan: "Förmodligen inget farligt"?
+    Rirma: Det finns alltid en risk. Skynda hem nu.
+<<else>>
+    Nohkan: Åh! Hej Rirma!
+    Rirma: Hej på dig med Nohkan.
+    Nohkan: Var är han som brukar stå bakom disken?
+    Rirma: Min farsa? Han gick bort i fjol.
+    Nohkan: VA?!
+    Rirma: Hahahaha! Din min! Om du bara kunde se dig själv!
+    Nohkan: ...
+    Nohkan: Va?
+    Rirma: Du är alltid lika lätt att lura!
+    Nohkan: Så... han är inte död?
+    Rirma: Nej nej.
+    Rirma: Han gick fram till mig och sa: "Barn mitt, en dag kommer du ta över min affär. Precis som jag gjorde från min far och han från sin." 
+    Rirma: "Det är hög tid att du börjar lära dig att ta mer ansvar över den."
+    Rirma: Men jag tror han bara ville ta ledigt.
+    Nohkan: ...
+    Nohkan: I alla fall, jag är här för att köpa några saker.
+    Rirma: Såklart. Vad är det du vill ha?
+    Nohkan: Jag har en lista här.
+    <<fade_out>>
+    <<fade_in>>
+    Rirma: Är det allt?
+    Nohkan: Ja, det borde vara allt.
+    Rirma: Förresten, vad säger du om att följa med mig och Vamemir till skogen imorgon?
+    Nohkan: Jag... tänkte faktiskt göra andra saker imorgon.
+    Rirma: Vad tänkte du göra? Om du bara tänkte läsa någon bok så kommer jag dra med dig om jag blir tvungen.
+    Nohkan: Det va inte alls min plan, jag tänkte faktiskt... prata... med... folk.
+    Rirma: Du är en usel lögnare. 
+    Rirma: Vi vet båda två att du inte skulle prata med någon annan om du kunde undvika det.
+    Rirma: Men om du verkligen inte vill så kommer jag inte tvinga dig.
+    <<face "Friend" 2>>
+    Rirma: Tänkte bara det skulle vara trevligt att göra något tillsammans igen.
+    <<face "Friend" 1>>
+    Rirma: Du vet, bara vi tre, som förr.
+    <<face "Friend" 2>>
+    Rirma: Men så blir det inte.
+    <<face "Friend" 1>>
+    Rirma: Fast jag och Vamemir kan fortfarande gå.
+    <<face "Friend" 2>>
+    Rirma: Men om du inte kommer så blir det svårt att få med Vamemir.
+    <<face "Friend" 1>>
+    Rirma: Det får väll bli någon annan gång.
+    <<face "Friend" 2>>
+    Rirma: Men min pappa håller på att bli gamal, så han kommer förmodligen få mig att göra mer jobb här i affären.
+    Rirma: Nej, det blir väll aldrig av.
+    Rirma: Tiden går vidare och vi kommer bli gamla och bittra. 
+    Rirma: Sen, en efter en, så kommer vi alla dö.
+    Rirma: Till slut kommer den sista av oss sitta ensam och önska att vi bara kunde ha en till dag tillsammans.
+    <<face "Friend" 1>>
+    Nohkan: Okej! Jag följer med!
+    Nohkan: Kan du bara... sluta säga såna saker?
+    Rirma: Visste att jag kunde lita på dig!
+    Nohkan: ...
+    Nohkan: Vad ska vi ens göra?
+    Rirma: Oroa dig inte för det, jag har något planerat.
+    Nohkan: Det gör mig bara mer orolig.
+    Rirma: Det kommer bli kul!
+    Rirma: Skynda hem nu. Lägg dig tidigt så att du är pigg och redo imorgon.
+    Nohkan: (Vad har jag gått med på?)
+    <<set $Package to true>>
+<<endif>>
+===

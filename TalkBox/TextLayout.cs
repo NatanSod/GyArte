@@ -183,7 +183,7 @@ namespace TalkBox
             {
                 if (currentWord.Count == 0) return; // There are no symbols to compile, so don't
 
-                if (maxWidth >= 0 && column != 0 && width + column - symbolMargin > maxWidth)
+                if (maxWidth >= 0 && column != 0 && width + column + (column > 0 ? spaces : 0) - symbolMargin > maxWidth)
                 {
                     // Begin a new line if the current word is too wide for this line.
                     NewLine();
@@ -215,7 +215,7 @@ namespace TalkBox
                 // If it's neither of those, it's a letter.
                 if (w != null && w != -1)
                 {
-                    width += symbolMargin + w ?? throw new Exception("This CAN'T ever happen, but it makes the IDE happy.");
+                    width += symbolMargin + (int)w;
                     currentWord.Add(symbolMargin + (int)w);
                 }
                 else

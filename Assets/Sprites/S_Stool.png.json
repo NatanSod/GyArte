@@ -1,0 +1,14 @@
+[
+    {
+        "Name": "stand",
+        "Frames" : 1,
+        "Facings" : 1,
+        "Width" : 18,
+        "Height" : 22,
+        "OriginX" : 9,
+        "OriginY" : 18,
+        "Speed" : 1,
+        "StartX" : 0,
+        "StartY" : 0
+    }
+]

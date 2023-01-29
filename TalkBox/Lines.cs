@@ -48,7 +48,7 @@ namespace TalkBox
 
             // Command: "<<[Command] [Arguments?]>>"
             string commandPattern = @"^<<([^\s]*)\s*(.*?)>>$";
-            m = Regex.Match(line, commandPattern, RegexOptions.IgnoreCase);
+            m = Regex.Match(text, commandPattern, RegexOptions.IgnoreCase);
             if (m.Success)
             {
                 string command = m.Groups[1].Value;
@@ -410,7 +410,7 @@ namespace TalkBox
             if (c == "declare")
             {
                 string args = String.Join(' ', a);
-                Match m = Regex.Match(args, @"(\$[\w\d]*)\b\s*?(to|[\+\-\*/]?=)\s*?([^\s].*?)\s*?as\s+(\w*)");
+                Match m = Regex.Match(args, @"(\$[\w\d]*)\b\s*?(to|[\+\-]?=)\s*(.*)");
                 if (!m.Success)
                 {
                     throw new ArgumentException("The declare statement could not be parsed correctly");
@@ -419,30 +419,9 @@ namespace TalkBox
                 string assign = m.Groups[2].Value == "to" ? "=" : m.Groups[2].Value; // Second it's the assignment type
                 string evaluate = m.Groups[3].Value; // After that is the thing that needs to be evaluated
 
-                // And last is the type.
-                string t = m.Groups[4].Value[0].ToString().ToUpper() + m.Groups[4].Value.Substring(1).ToLower(); // First letter must be capitalized
-                string[] types = Enum.GetNames<Variable.vType>(); // Get the options for what it could be
-                int tInt = Array.IndexOf(types, t);
-                if (tInt == -1)
-                {
-                    throw new ArgumentException("There is no type in this declaration");
-                }
-                Variable.vType type = (Variable.vType)tInt;
-
-
                 Variable value;
-                if (type == Variable.vType.Bool)
-                {
-                    value = new Variable(Variables.Evaluate(evaluate).ToString(), Variable.vType.Bool);
-                }
-                else
-                {
-                    value = Variables.Calculate(evaluate);
-                    if (type != value.Type)
-                    {
-                        throw new ArgumentException("The type assigned to this variable doesn't match the value it's defined as");
-                    }
-                }
+                
+                value = Variables.Calculate(evaluate);
 
                 Variables.Define(name, value);
                 runner.FinnishCommand();
@@ -483,7 +462,7 @@ namespace TalkBox
             {
                 // I have decided to make this work at a later date.
                 // It was none of the default commands. Give it to the CommandHandler and hope it knows what to do.
-                Variable[] arguments = new Variable[a.Length];
+                Variable[] arguments = new Variable[(a.Length == 1 && a[0] == string.Empty)? 0 : a.Length];
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     arguments[i] = Variables.Calculate(a[i]);

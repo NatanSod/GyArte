@@ -1,0 +1,12 @@
+{
+    "Width": 15,
+    "Length": 12,
+    "TileSet": "Indoors",
+    "Layout": [],
+    "Walls": [],
+    "Slaves": [],
+    "Entrances":
+    [
+        { "X": -10, "Y": -10, "FaceX": 0, "FaceY": 1 }
+    ]
+}

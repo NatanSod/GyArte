@@ -115,38 +115,42 @@ namespace GyArte
                     Done = true;
                 }
             }
-            Raylib.DrawText(progress.ToString(), 50, 60, 20, Color.BLACK);
+            // Raylib.DrawText(progress.ToString(), 50, 60, 20, Color.BLACK);
 
             int i = 0;
 
-            Render.BeginDraw(Render.Layer.UI, 1);
-            nameBox.Draw(nameLayout);
-
             if (currentLine.s != null)
             {
-                foreach (char symbol in currentLine.s)
+                Render.BeginDraw(Render.Layer.UI, 1);
+                nameBox.Draw(nameLayout);
+
+                if (currentLine.s != null)
                 {
-                    if (symbol == ' ' || symbol == '\n')
+                    foreach (char symbol in currentLine.s)
                     {
+                        if (symbol == ' ' || symbol == '\n')
+                        {
+                            i++;
+                            continue;
+                        }
+
+                        Vector2 position = nameLayout[i] + nameBox.Origin;
+
+                        // This is to help check that the symbols are spaced properly.
+                        // int width = Raylib.ImageText(symbol.ToString(), currentFontSize, Color.BLACK).width;
+                        // Raylib.DrawRectangle((int)position.X, (int)position.Y + currentBaseOffset, width, currentFontSize, Color.RED);
+
+                        Raylib.DrawText(symbol.ToString(),
+                                        (int)position.X,
+                                        (int)position.Y,
+                                        nameBox.FontSize.Medium,
+                                        Color.BLACK);
                         i++;
-                        continue;
                     }
-
-                    Vector2 position = nameLayout[i] + nameBox.Origin;
-
-                    // This is to help check that the symbols are spaced properly.
-                    // int width = Raylib.ImageText(symbol.ToString(), currentFontSize, Color.BLACK).width;
-                    // Raylib.DrawRectangle((int)position.X, (int)position.Y + currentBaseOffset, width, currentFontSize, Color.RED);
-
-                    Raylib.DrawText(symbol.ToString(),
-                                    (int)position.X,
-                                    (int)position.Y,
-                                    nameBox.FontSize.Medium,
-                                    Color.BLACK);
-                    i++;
                 }
+                Render.EndDraw();
             }
-            Render.EndDraw();
+            
             Render.BeginDraw(Render.Layer.UI, 0);
             dialogueBox.Draw();
             i = 0;

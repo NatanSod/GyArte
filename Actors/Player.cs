@@ -16,24 +16,24 @@ namespace Hivemind
             TALK,
         }
 
-        State state = State.STAND;
+        State state = State.TALK;
 
-        public int Width { get; private set; } = 30;
-        public int Length { get; private set; } = 22;
+        public int Width { get; private set; } = 21;
+        public int Length { get; private set; } = 12;
         // int height = 36;
 
         public Vector2 Position { get; private set; } = new Vector2(Render.Width / 2, Render.Height / 2);
         public Vector2 Facing { get; private set; } = Vector2.UnitY;
         public float Time { get; private set; } = 0;
         Vector2 velocity = Vector2.Zero;
-        float speed = 4;
+        float speed = 2;
         int animationTime = 0;
         // Trail trail;
         DialogueHandler dh { get => Mastermind.mouthpiece; }
 
         public Player()
         {
-            spriteSheet = Mastermind.LoadSheet("Test");
+            spriteSheet = Mastermind.LoadSheet("Player");
             stand = spriteSheet.GetAnimation("stand");
             walk = spriteSheet.GetAnimation("walk");
 
@@ -43,7 +43,7 @@ namespace Hivemind
         public Player(Vector2 position)
         {
             Position = position;
-            spriteSheet = Mastermind.LoadSheet("Test");
+            spriteSheet = Mastermind.LoadSheet("Player");
             stand = spriteSheet.GetAnimation("stand");
             walk = spriteSheet.GetAnimation("walk");
 
@@ -93,10 +93,6 @@ namespace Hivemind
             if (Raylib.IsKeyDown(KeyboardKey.KEY_S)) { velocity += Vector2.UnitY; }
             if (Raylib.IsKeyDown(KeyboardKey.KEY_A)) { velocity -= Vector2.UnitX; }
             if (Raylib.IsKeyDown(KeyboardKey.KEY_D)) { velocity += Vector2.UnitX; }
-            if (Raylib.IsKeyPressed(KeyboardKey.KEY_R))
-            {
-                Position = new Vector2(Render.Width / 2, Render.Height / 2);
-            }
 
             float magnitude = velocity.Length();
             if (magnitude != 0)
@@ -237,7 +233,7 @@ namespace Hivemind
             {
                 case State.WALK:
                     walk.Draw(direction, animationTime, (int)(Position.X - Mastermind.Eyes.X), (int)(Position.Y - Mastermind.Eyes.Y));
-                    animationTime = (animationTime + 1) % walk.Frames;
+                    animationTime = (animationTime + 1) % (walk.Frames * walk.Speed);
                     break;
                 case State.STAND:
                     animationTime = 0;

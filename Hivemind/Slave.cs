@@ -55,6 +55,11 @@ namespace Hivemind
             Facing = DirectionIndexFromVector(target - Position);
         }
 
+        public void Face(int direction)
+        {
+            Facing = direction;
+        }
+
         public static int DirectionIndexFromVector(Vector2 vector)
         {
             vector = Vector2.Normalize(new Vector2(vector.X, vector.Y));

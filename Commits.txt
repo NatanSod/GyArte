@@ -98,3 +98,13 @@ While there is so much more I want to add, I feel this is where the programming 
 After having taken a break from coding and instead thinking about what I need to do, I made some changes to things. First, I made it so that changing rooms is no longer done through the interaction being labeled as a door. Everything is now dialogue, but some dialogue does not contain actual words or text but instead simply contains dialogue commands. Changing the room is now a dialogue command. The ability so set a slave's solidity is also a dialogue command. I've also made it so that dialogues that don't include text or options instantly finnish.
 In order to make the commands specific to this program without desecrating TalkBox with outside influence, I made CommandManager abstract and made it so that the code that uses TalkBox provides a CommandManager. This also allowed me to make TalkBox itself be able to support commands that execute over a period of time, but I currently do not have any code to do so.
 There was also a small fix made to variables and I also made it so that when a new hive is constructed it moves the player instead of creating a new one because reasons.
+
+
+13 - The Bare Minimum
+As the title implies, the bare minimum has been reached. This includes:
+All dialogue.
+All rooms.
+All sprites.
+All commands.
+And a lot of bug fixes.
+However, I still need to translate the dialogue to English as well before I'm completely done.

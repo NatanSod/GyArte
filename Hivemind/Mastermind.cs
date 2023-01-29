@@ -15,9 +15,10 @@ namespace Hivemind
         // This needs to happen first, because the player and the hive is initialized they try to access it.
         // I should initialize them in Awaken, but then the IDE complains about possible null reference.
         static private List<SpriteSheet> spriteSheets = new List<SpriteSheet>();
+        // The sprite sheets are not unloaded properly.
 
         static public DialogueHandler mouthpiece { get; private set; }
-        static public CommandManager commander { get; private set; }
+        static public Commander commander { get; private set; }
         static public DialogueRunner lore { get; private set; }
         static public Player victim { get; private set; }
         static public Hive currentHive { get; private set; }
@@ -30,9 +31,11 @@ namespace Hivemind
         {
             mouthpiece = new DialogueHandler();
             commander = new Commander();
-            lore = new DialogueRunner(mouthpiece, commander, @"Assets\Dialogue\testDi", "testDi");
+            lore = new DialogueRunner(mouthpiece, commander, @"Assets\Dialogue\Bedroom");
             victim = new Player();
-            currentHive = new Hive("Test");
+            currentHive = new Hive("TheVoid");
+            ConstructHive("TheVoid", 0);
+            mouthpiece.BeginDialogue(lore);
 
             float x = victim.Position.X - Render.Width;
             float y = victim.Position.Y - Render.Height;
@@ -87,8 +90,8 @@ namespace Hivemind
             // Add a bit more fanfare maybe.
             currentHive.Deconstruct();
             currentHive = new Hive(name);
-            Vector2 start = currentHive.Entrances[0][position];
-            Vector2 facing = currentHive.Entrances[1][position];
+            Vector2 start = currentHive.Entrances[0, position];
+            Vector2 facing = currentHive.Entrances[1, position];
             victim.SetPosition(start, facing);
         }
 
@@ -101,6 +104,7 @@ namespace Hivemind
             {
                 Converse();
             }
+            commander.RunAsync();
 
             victim.Update();
             UpdateEyes();
@@ -137,7 +141,7 @@ namespace Hivemind
 
             if (interacting?.Interaction == null) return null;
             subject = interacting;
-            lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{interacting.Interaction}", interacting.Interaction);
+            lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{currentHive.Name}", $"{currentHive.Name}{interacting.Interaction}");
             mouthpiece.BeginDialogue(lore);
             if (mouthpiece.Running)
             {
@@ -170,7 +174,7 @@ namespace Hivemind
 
                 hasRun.Add(trigger);
                 subject = trigger;
-                lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{trigger.Interaction}", trigger.Interaction);
+                lore = new DialogueRunner(mouthpiece, commander, @$"Assets\Dialogue\{currentHive.Name}", $"{currentHive.Name}{trigger.Interaction}");
                 mouthpiece.BeginDialogue(lore);
 
                 if (mouthpiece.Running)
