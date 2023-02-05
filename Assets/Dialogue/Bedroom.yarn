@@ -1,59 +1,112 @@
 title: Start
 position: 360,245
 ---
+<<declare $SE = true>>
 <<declare $ExitRoom = false>>
 <<declare $Mission = false>>
 <<declare $Package = false>>
 <<declare $Done = false>>
-Tryck på mellanslag för att fortsätta.
+<<if $SE>>
+    Tryck på mellanslag för att fortsätta.
+    Gå med W, A, S och D.
+<<else>>
+    Press space to continue.
+    Walk with W, A, S, and D.
+<<endif>>
 <<change_room "Bedroom" 0>>
 <<fade_in>>
-Nohkan: Äntligen, lite fritid.
-Nohkan: Men vad ska jag göra med den? #Last
--> Läs boken
--> Läs boken
--> Läs boken
-Nohkan: Det är inte ens en fråga.
-Nohkan: Den har legat oläst på mitt skrivbord alldeles för länge.
+<<if $SE>>
+    Nohkan: Äntligen, lite fritid.
+    Nohkan: Men vad ska jag göra med den? #Last
+    -> Läs boken
+    -> Läs boken
+    -> Läs boken
+    Nohkan: Det är inte ens en fråga.
+    Nohkan: Den har legat oläst på mitt skrivbord alldeles för länge.
+<<else>>
+    Nohkan: Finally, some free time.
+    Nohkan: But what to do with it?
+    -> Read the book
+    -> Read the book
+    -> Read the book
+    Nohkan: It's not even a question.
+    Nohkan: It has been lying unread on my desk for way too long.
+<<endif>>
 ===
 title: BedroomDoor
 position: 252,410
 ---
 <<if $Done>>
-    Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+    <<if $SE>>
+        Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+    <<else>>
+        Nohkan: I'm not going back out now that the book is so close.
+    <<endif>>
 <<elseif $ExitRoom>>
     <<fade_out>>
     <<change_room "Hallway" 0>>
     <<fade_in>>
 <<else>>
-    Nohkan: Jag antar att jag kan läsa utomhus. 
-    Nohkan: Men jag behöver fortfarande ta med mig boken.
+    <<if $SE>>
+        Nohkan: Jag antar att jag kan läsa utomhus. 
+        Nohkan: Men jag behöver fortfarande ta med mig boken.
+    <<else>>
+        Nohkan: I guess I can read outside.
+        Nohkan: But I will still need to bring the book.
+    <<endif>>
 <<endif>>
 ===
 title: BedroomBook
 position: 494,436
 ---
 <<if $Done>>
-    Nohkan: Efter en lång dag så kan jag äntligen läsa min bok.
-    Nohkan: ...
-    Nohkan: Men nu kan jag inte sluta tänka på imorgon...
-    Nohkan: ...
-    Nohkan: Det blir trevligt att bara vara vi tre igen.
-    Nohkan: Jag, Vamemir och Rirma. Precis som förr.
-    Nohkan: Hoppas bara att Rirma inte hittat på något dumt.
-    <<fade_out>>
-    <<change_room "TheVoid" 0>>
-    Det här är slutet på denna del av studien.
-    Var snäll och informera mig (personen som bad dig spela detta spel) att du är klar ifall jag inte redan vet.
+    <<if $SE>>
+        Nohkan: Efter en lång dag så kan jag äntligen läsa min bok.
+        Nohkan: ...
+        Nohkan: Men nu kan jag inte sluta tänka på imorgon...
+        Nohkan: ...
+        Nohkan: Det blir trevligt att bara vara vi tre igen.
+        Nohkan: Jag, Vamemir och Rirma. Precis som förr.
+        Nohkan: Hoppas bara att Rirma inte hittat på något dumt.
+        <<fade_out>>
+        <<change_room "TheVoid" 0>>
+        Det här är slutet på denna del av studien.
+        Var snäll och informera mig (personen som bad dig spela detta spel) att du är klar ifall jag inte redan vet.
+    <<else>>
+        Nohkan: After a long day I can finally read the book.
+        Nohkan: ...
+        Nohkan: But now I can't stop thinking about tomorrow...
+        Nohkan: ...
+        Nohkan: It will be nice to just be us three again.
+        Nohkan: Me, Vamemir and Rirma. Just like we used to.
+        Nohkan: Just hope that Rirma isn't planning something stupid.
+        <<fade_out>>
+        <<change_room "TheVoid" 0>>
+        This is the end of this part of the study.
+        Please inform me (the person who asked you to play this game) that you are done in case I don't already know.
+    <<endif>>
 <<elseif $ExitRoom>>
-    Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+    <<if $SE>>
+        Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+    <<else>>
+        Nohkan: I don't want to risk getting kicked out. I should check what he wants.
+    <<endif>>
 <<else>>
-    Nohkan: Nu är det dags att läsa!
-    Telbeth: Hej! Nohkan!
-    Telbeth: Kom ner hit. Jag behöver din hjälp.
-    Nohkan: Visste att det va för bra för att vara sant.
-    Nohkan: Jag borde gå och kolla vad Telbeth vill.
-    Nohkan: Han kan ju sparka ut mig om jag inte kommer.
+    <<if $SE>>
+        Nohkan: Nu är det dags att läsa!
+        Telbeth: Hej! Nohkan!
+        Telbeth: Kom ner hit. Jag behöver din hjälp.
+        Nohkan: Visste att det va för bra för att vara sant.
+        Nohkan: Jag borde gå och kolla vad Telbeth vill.
+        Nohkan: Han kan ju sparka ut mig om jag inte kommer.
+    <<else>>
+        Nohkan: Now it's time to read!
+        Telbeth: Hey! Nohkan!
+        Telbeth: Get down here. I need your help.
+        Nohkan: Knew it was too good to be true.
+        Nohkan: I should check what Telbeth wants.
+        Nohkan: After all, he can kick me out if I don't.
+    <<endif>>
     <<set $ExitRoom = true>>
 <<endif>>
 ===

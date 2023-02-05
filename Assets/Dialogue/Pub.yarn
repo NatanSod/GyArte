@@ -2,17 +2,30 @@ title: PubExit
 position: 479,-17
 ---
 <<if $Package>>
-    Nohkan: Jag har varit ute lagom mycket idag.
+    <<if $SE>>
+        Nohkan: Jag har varit ute lagom mycket idag.
+    <<else>>
+        Nohkan: I have been outside enough for one day.
+    <<endif>>
 <<elseif $Mission>>
     <<fade_out>>
     <<change_room "TheVoid" 0>>
-    En kort promenad senare...
+    <<if $SE>>
+        En kort promenad senare...
+    <<else>>
+        A short walk later...
+    <<endif>>
     <<change_room "Store" 0>>
     <<fade_in>>
 <<else>>
     <<face "Boss" 0>>
-    Telbeth: Hörru! Nohkan! 
-    Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<if $SE>>
+        Telbeth: Hörru! Nohkan! 
+        Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<else>>
+        Telbeth: Hey! Nohkan! 
+        Telbeth: Don't try to sneak away, I need your help.
+    <<endif>>
     <<face "Boss" 1>>
 <<endif>>
 ===
@@ -24,15 +37,28 @@ position: -139,-7
     <<change_room "Hallway" 1>>
     <<fade_in>>
 <<elseif $Package>>
-    Nohkan: Jag tänker inte ta med mig Telbeths beställning till mitt rum.
+    <<if $SE>>
+        Nohkan: Jag tänker inte ta med mig Telbeths beställning till mitt rum.
+    <<else>>
+        Nohkan: I'm not going to bring Telbeth's order to my room.
+    <<endif>>
 <<elseif $Mission>>
     <<face "Boss" 2>>
-    Telbeth: Du kan gå tillbaka till ditt rum när du är klar.
+    <<if $SE>>
+        Telbeth: Du kan gå tillbaka till ditt rum när du är klar.
+    <<else>>
+        Telbeth: You can go back to your room when you're done.
+    <<endif>>
     <<face "Boss" 1>>
 <<else>>
     <<face "Boss" 2>>
-    Telbeth: Hörru! Nohkan! 
-    Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<if $SE>>
+        Telbeth: Hörru! Nohkan! 
+        Telbeth: Försök inte smita iväg nu, jag behöver din hjälp.
+    <<else>>
+        Telbeth: Hey! Nohkan! 
+        Telbeth: Don't try to sneak away, I need your help.
+    <<endif>>
     <<face "Boss" 1>>
 <<endif>>
 ===
@@ -41,27 +67,56 @@ position: 143,-4
 ---
 <<face "Boss" "Player">>
 <<if $Done>>
-    Nohkan: Du kommer väll inte ropa på mig igen?
-    Telbeth: Nej, det kommer jag inte.
-    Nohkan: Bra.
+    <<if $SE>>
+        Nohkan: Du kommer väll inte ropa på mig igen?
+        Telbeth: Nej, det kommer jag inte.
+        Nohkan: Bra.
+    <<else>>
+        Nohkan: You're not going to shout for me again?
+        Telbeth: No, I will not.
+        Nohkan: Good.
+    <<endif>>
 <<elseif $Package>>
-    Nohkan: Jag har allt.
-    Telbeth: Tack så mycket.
-    Telbeth: Du kan gå upp till ditt rum och göra det du gör där.
-    Nohkan: Äntligen. Jag kan till slut läsa min bok.
+    <<if $SE>>
+        Nohkan: Jag har allt.
+        Telbeth: Tack så mycket.
+        Telbeth: Du kan gå upp till ditt rum och göra det du gör där.
+        Nohkan: Äntligen. Jag kan till slut läsa min bok.
+    <<else>>
+        Nohkan: I got everything.
+        Telbeth: Thanks a lot.
+        Telbeth: You can go back to your room and do whatever it is you do there.
+        Nohkan: At last. I can finally read the book.
+    <<endif>>
     <<set $Done = true>>
 <<elseif $Mission>>
-    Nohkan: Jag vet att du hört det minst 50 gågner men jag kom precis på att- #Last
-    Telbeth: Vi kan prata mer om det när du kommer tillbaka.
+    <<if $SE>>
+        Nohkan: Jag vet att du hört det minst 50 gågner men jag kom precis på att- #Last
+        Telbeth: Vi kan prata mer om det när du kommer tillbaka.
+    <<else>>
+        Nohkan: I know you've heard it at least 50 times, but I just realised that- #Last
+        Telbeth: We can talk more when you get back.
+    <<endif>>
 <<else>>
-    Nohkan: Du ville något?
-    Telbeth: Ja. Jag behöver köpa några saker men är upptagen här.
-    Telbeth: Skulle du kunna gå och ta hand om det?
-    Nohkan: Igen?
-    Nohkan: Det här skulle bli så mycket lättare ifall vi bara- #Last
-    Telbeth: Jag vet.
-    Nohkan: Men om- #Last
-    Telbeth: Här är listan. Lite frisk luft kommer göra dig gott.
+    <<if $SE>>
+        Nohkan: Du ville något?
+        Telbeth: Ja. Jag behöver köpa några saker men är upptagen här.
+        Telbeth: Skulle du kunna gå och ta hand om det?
+        Nohkan: Igen?
+        Nohkan: Det här skulle bli så mycket lättare ifall vi bara- #Last
+        Telbeth: Jag vet.
+        Nohkan: Men om- #Last
+        Telbeth: Här är listan. Lite frisk luft kommer göra dig gott.
+    <<else>>
+        Nohkan: You need something?
+        Telbeth: Yes. I need to buy some things but I am busy here.
+        Telbeth: Could you go and take care of that?
+        Nohkan: Again?
+        Nohkan: You know, this would be a lot easier if we just- #Last
+        Telbeth: I know.
+        Nohkan: But we- #Last
+        Telbeth: Here's the list. A bit of fresh air will do you good.
+    <<endif>>
     <<set $Mission = true>>
 <<endif>>
 <<face "Boss" 1>>

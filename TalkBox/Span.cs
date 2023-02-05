@@ -302,7 +302,7 @@ namespace TalkBox
                 // I would really want a better way of having a default colour, but I don't want to do more of this after the Tag class.
                 if (!colored)
                 {
-                    type |= type |= MoveValue(Span.Markup.COLOR, Span.MarkValue.BLACK);
+                    type |= type |= MoveValue(Span.Markup.COLOR, Span.MarkValue.WHITE);
                 }
                 Span span = new Span(type, txt.Substring(index, end - index));
                 spans.Add(span);

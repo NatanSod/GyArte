@@ -154,7 +154,7 @@ namespace Hivemind
             {
                 // The line is being written to the screen and it isn't waiting for an async command.
                 // If next line input was given, then tell the displayer to finnish.
-                if (next)
+                if (next && !auto)
                 {
                     dd.SkipLine();
                 }

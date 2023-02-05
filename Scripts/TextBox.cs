@@ -201,12 +201,12 @@ namespace GyArte
                                  (int)(Origin.Y - Border.Y - Margin.Y),
                                  (int)(_currentArea.X + (Border.X + Margin.X) * 2),
                                  (int)(_currentArea.Y + (Border.Y + Margin.Y) * 2),
-                                 Color.SKYBLUE);
+                                 Color.BLUE);
             Raylib.DrawRectangle((int)(Origin.X - Margin.X),
                                  (int)(Origin.Y - Margin.Y),
                                  (int)(_currentArea.X + Margin.X * 2),
                                  (int)(_currentArea.Y + Margin.Y * 2),
-                                 Color.BLUE);
+                                 Color.BLACK);
         }
 
         public void Draw(TextLayout layout)
@@ -237,9 +237,9 @@ namespace GyArte
 
             if (highlight != null)
             {
-                Raylib.DrawRectangle((int)Origin.X,
+                Raylib.DrawRectangle((int)Origin.X - 2,
                                      (int)Origin.Y + origins[(int)highlight],
-                                     (int)width,
+                                     (int)width + 4,
                                      (int)layouts[(int)highlight].Height - LineSpacing,
                                      Color.WHITE);
             }

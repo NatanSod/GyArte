@@ -6,14 +6,22 @@ position: 287,401
     <<change_room "Bedroom" 1>>
     <<fade_in>>
 <<else>>
-    Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+    <<if $SE>>
+        Nohkan: Jag vill inte riskera att bli utsparkad. Jag borde fråga vad han vill.
+    <<else>>
+        Nohkan: I don't want to risk getting kicked out. I should check what he wants.
+    <<endif>>
 <<endif>>
 ===
 title: HallwayTDoor
 position: 287,401
 ---
 <<if $Done>>
-    Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+    <<if $SE>>
+        Nohkan: Jag tänker inte gå ut igen nu när boken är så nära.
+    <<else>>
+        Nohkan: I'm not going back out now that the book is so close.
+    <<endif>>
 <<else>>
     <<fade_out>>
     <<change_room "Pub" 0>>

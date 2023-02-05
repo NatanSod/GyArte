@@ -144,7 +144,7 @@ namespace GyArte
                                         (int)position.X,
                                         (int)position.Y,
                                         nameBox.FontSize.Medium,
-                                        Color.BLACK);
+                                        Color.WHITE);
                         i++;
                     }
                 }
@@ -227,7 +227,7 @@ namespace GyArte
                     int index = 0;
                     if (!options[i].Item2)
                     {
-                        currentColor = Color.LIGHTGRAY;
+                        currentColor = Color.DARKGRAY;
                         Raylib.DrawText("-",
                                         (int)(optionLayouts[i][0] + optionBox.Origin).X,
                                         (int)(optionLayouts[i][0] + optionBox.Origin).Y + origins[i] + currentBaseOffset,
@@ -239,6 +239,10 @@ namespace GyArte
                                         currentFontSize,
                                         currentColor);
                         index = 2;
+                    }
+                    else if (i == option)
+                    {
+                        currentColor = Color.BLACK;
                     }
 
                     foreach (char symbol in span.contents)
