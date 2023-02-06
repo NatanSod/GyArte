@@ -68,7 +68,7 @@ position: 143,-4
 <<face "Boss" "Player">>
 <<if $Done>>
     <<if $SE>>
-        Nohkan: Du kommer väll inte ropa på mig igen?
+        Nohkan: Du kommer väl inte ropa på mig igen?
         Telbeth: Nej, det kommer jag inte.
         Nohkan: Bra.
     <<else>>

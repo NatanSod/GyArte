@@ -104,9 +104,9 @@ position: 130,193
         Rirma: You are always as easy to trick!
         Nohkan: So... he's not dead?
         Rirma: No no.
-        Rirma: He went up to me and said: "Child of mine, One day you will take of this store. Just like I did from my father, and he from his." 
+        Rirma: He went up to me and said: "Child of mine, One day you will take over this store. Just like I did from my father, and he from his." 
         Rirma: "It is high time you learn to take care of it."
-        Rirma: But I think he just wanted to take the day of.
+        Rirma: But I think he just wanted to take the day off.
         Nohkan: ...
         Nohkan: Anyway, I'm here to buy things.
         Rirma: Of course. What do you need?
@@ -131,7 +131,7 @@ position: 130,193
         <<face "Friend" 1>>
         Rirma: I guess I and Vamemir could still go.
         <<face "Friend" 2>>
-        Rirma: But if you're not comming then it will be hard to convince Vamemir.
+        Rirma: But if you're not coming then it will be hard to convince Vamemir.
         <<face "Friend" 1>>
         Rirma: It will just have to be some other time.
         <<face "Friend" 2>>
@@ -141,7 +141,7 @@ position: 130,193
         Rirma: Then, one by one, we're going to die off.
         Rirma: In the end, the last one of us will sit alone and wish that we could just spend one more day together.
         <<face "Friend" 1>>
-        Nohkan: Okay! I'm comming along!
+        Nohkan: Okay! I'm coming along!
         Nohkan: Could you just... stop saying such things?
         Rirma: I knew I could count on you!
         Nohkan: ...
