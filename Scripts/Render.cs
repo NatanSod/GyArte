@@ -10,6 +10,7 @@ namespace GyArte
     /// <summary>
     /// A little class I use to make the display scalable and pixel perfect.
     /// It basically captures everything drawn through Raylib and then only displays what it captured.
+    /// It is also used to handle layers so that I won't have to think about the order in which everything is drawn.
     /// </summary>
     public static class Render
     {
@@ -23,24 +24,55 @@ namespace GyArte
             DEBUG,
         }
 
+        /// <summary>
+        /// The amount of pixels on the x axis.
+        /// </summary>
+        /// <value>The amount of pixels on the x axis.</value>
         public static int Width { get; private set; } = 0;
+        /// <summary>
+        /// The amount of pixels on the y axis.
+        /// </summary>
+        /// <value>The amount of pixels on the y axis.</value>
         public static int Height { get; private set; } = 0;
+        /// <summary>
+        /// The width and height of one rendered pixel in screen pixels.
+        /// </summary>
+        /// <value>The width and height of one rendered pixel in screen pixels.</value>
         public static int PixelSize { get; private set; } = 0;
 
-        public static int ScreenWidth { get => Raylib.GetMonitorWidth(Raylib.GetCurrentMonitor()); }
-        public static int ScreenHeight { get => Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()); }
+        /// <summary>
+        /// Gets the horizontal resolution of the screen.
+        /// </summary>
+        /// <returns>The horizontal resolution of the screen.</returns>
+        public static int ScreenWidth { get => Raylib.GetScreenWidth(); }
+        /// <summary>
+        /// Gets the vertical resolution of the screen.
+        /// </summary>
+        /// <returns>The vertical resolution of the screen.</returns>
+        public static int ScreenHeight { get => Raylib.GetScreenHeight(); }
 
-        public static int WindowWidth { get => Raylib.GetScreenWidth(); }
-        public static int WindowHeight { get => Raylib.GetScreenHeight(); }
-
+        /// <summary>
+        /// Holds the width the window had in screen pixels before it was fullscreen.
+        /// </summary>
         private static int _windowWidthSave;
+        /// <summary>
+        /// Holds the width the window had in screen pixels before it was fullscreen.
+        /// </summary>
         private static int _windowHeightSave;
 
+        /// <summary>
+        /// Get the width of the render in screen pixels.
+        /// </summary>
+        /// <returns>The width of the render in screen pixels.</returns>
         public static int DisplayWidth { get => Width * PixelSize; }
+        /// <summary>
+        /// Get the height of the render in screen pixels.
+        /// </summary>
+        /// <returns>The height of the render in screen pixels.</returns>
         public static int DisplayHeight { get => Height * PixelSize; }
 
-        static int LeftMargin { get => (WindowWidth - DisplayWidth) >> 1; }
-        static int TopMargin { get => (WindowHeight - DisplayHeight) >> 1; }
+        static int LeftMargin { get => (ScreenWidth - DisplayWidth) >> 1; }
+        static int TopMargin { get => (ScreenHeight - DisplayHeight) >> 1; }
 
         static bool debug = false;
 
@@ -66,9 +98,12 @@ namespace GyArte
             Raylib.InitWindow(DisplayWidth, DisplayHeight, "Game");
 
             Raylib.SetWindowMinSize(renderWidth, renderHeight);
-
         }
 
+        /// <summary>
+        /// Checks if the window should be resized and then changes. 
+        /// If it should be changed then it also resizes the window.
+        /// </summary>
         static void Resize()
         {
             // This is here for testing purposes.
@@ -87,8 +122,8 @@ namespace GyArte
                 }
                 else
                 {
-                    _windowWidthSave = WindowWidth;
-                    _windowHeightSave = WindowHeight;
+                    _windowWidthSave = ScreenWidth;
+                    _windowHeightSave = ScreenHeight;
 
                     Raylib.SetWindowSize(ScreenWidth, ScreenHeight);
                     Raylib.ToggleFullscreen();
@@ -102,7 +137,7 @@ namespace GyArte
             }
 
             int i = 1;
-            while (i * Width <= WindowWidth && i * Height <= WindowHeight)
+            while (i * Width <= ScreenWidth && i * Height <= ScreenHeight)
             {
                 i++;
             }
@@ -111,6 +146,9 @@ namespace GyArte
         }
 
         static bool isDrawing = false;
+        /// <summary>
+        /// Begin drawing a new frame.
+        /// </summary>
         public static void BeginFrame()
         {
             if (isDrawing) throw new Exception("It's already drawing");
@@ -122,6 +160,9 @@ namespace GyArte
             Raylib.BeginDrawing();
         }
 
+        /// <summary>
+        /// End drawing the current frame, merge all layers, and display the resulting image on the screen.
+        /// </summary>
         public static void EndFrame()
         {
             if (!isDrawing) throw new Exception("It wasn't drawing");
@@ -147,6 +188,9 @@ namespace GyArte
             drawings.Clear();
         }
 
+        /// <summary>
+        /// An image which should be displayed on the specified layer at the specified distance.
+        /// </summary>
         private class Drawing
         {
             public Layer Layer { get; private set; }
@@ -187,6 +231,9 @@ namespace GyArte
             _currentDistance = distance;
         }
 
+        /// <summary>
+        /// End the current drawing and add it to the list of layers to be drawn.
+        /// </summary>
         public static void EndDraw()
         {
             if (_currentLayer == Layer.NONE) return;
